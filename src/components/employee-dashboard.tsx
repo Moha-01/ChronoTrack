@@ -20,6 +20,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { UserPlus, ChevronRight, Trash2, Rocket } from 'lucide-react';
 
 interface EmployeeDashboardProps {
@@ -38,12 +49,20 @@ export default function EmployeeDashboard({
   onAddDemoEmployee,
 }: EmployeeDashboardProps) {
   const [newEmployee, setNewEmployee] = useState('');
+  const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
 
   const handleAddEmployee = (e: React.FormEvent) => {
     e.preventDefault();
     if (newEmployee.trim()) {
       onAddEmployee(newEmployee.trim());
       setNewEmployee('');
+    }
+  };
+
+  const confirmDelete = () => {
+    if (employeeToDelete) {
+      onDeleteEmployee(employeeToDelete);
+      setEmployeeToDelete(null);
     }
   };
 
@@ -79,13 +98,29 @@ export default function EmployeeDashboard({
                           >
                             <ChevronRight className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => onDeleteEmployee(employee)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => setEmployeeToDelete(employee)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird der Mitarbeiter und alle seine Zeiteinträge dauerhaft gelöscht.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setEmployeeToDelete(null)}>Abbrechen</AlertDialogCancel>
+                                <AlertDialogAction onClick={confirmDelete}>Löschen</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </TableCell>
                       </TableRow>
                     ))}
