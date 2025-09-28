@@ -50,50 +50,6 @@ export default function EmployeeDashboard({
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
-        <div className="md:col-span-1 flex flex-col gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <UserPlus className="h-5 w-5" />
-                Neuen Mitarbeiter hinzufügen
-              </CardTitle>
-            </CardHeader>
-            <form onSubmit={handleAddEmployee}>
-              <CardContent>
-                <div className="grid w-full items-center gap-1.5">
-                  <Label htmlFor="employee-name">Mitarbeitername</Label>
-                  <Input
-                    id="employee-name"
-                    placeholder="z.B. Alice Johnson"
-                    value={newEmployee}
-                    onChange={(e) => setNewEmployee(e.target.value)}
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" className="w-full">
-                  Mitarbeiter hinzufügen
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-          <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                    <Rocket className="h-5 w-5" />
-                    Schnellstart
-                </CardTitle>
-                <CardDescription>
-                    Erstellen Sie einen Demo-Mitarbeiter mit Beispieldaten für den aktuellen Monat.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Button onClick={onAddDemoEmployee} className="w-full">
-                    Demo erstellen
-                </Button>
-            </CardContent>
-          </Card>
-        </div>
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
@@ -143,6 +99,55 @@ export default function EmployeeDashboard({
                   </TableBody>
                 </Table>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="md:col-span-1 flex flex-col gap-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <UserPlus className="h-5 w-5" />
+                Neuen Mitarbeiter hinzufügen
+              </CardTitle>
+            </CardHeader>
+            <form onSubmit={handleAddEmployee}>
+              <CardContent>
+                <div className="grid w-full items-center gap-1.5">
+                  <Label htmlFor="employee-name">Mitarbeitername</Label>
+                  <Input
+                    id="employee-name"
+                    placeholder="z.B. Alice Johnson"
+                    value={newEmployee}
+                    onChange={(e) => setNewEmployee(e.target.value)}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" className="w-full">
+                  Mitarbeiter hinzufügen
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+        <div className="md:col-span-2"></div>
+        <div className="md:col-span-1">
+          <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                    <Rocket className="h-5 w-5" />
+                    Schnellstart
+                </CardTitle>
+                <CardDescription>
+                    Erstellen Sie einen Demo-Mitarbeiter mit Beispieldaten für den aktuellen Monat.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button onClick={onAddDemoEmployee} className="w-full">
+                    Demo erstellen
+                </Button>
             </CardContent>
           </Card>
         </div>
