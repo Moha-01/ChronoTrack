@@ -109,8 +109,6 @@ export default function TimeTracker({ employee, allEntries, setAllEntries }: Tim
       html2canvas(reportElement, {
         useCORS: true,
         scale: 2, 
-        logging: true,
-        allowTaint: true,
       }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
