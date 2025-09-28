@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import EmployeeDashboard from '@/components/employee-dashboard';
 import TimeTracker from '@/components/time-tracker';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,59 @@ import type { TimeEntry } from '@/lib/types';
 import { calculateDuration } from '@/lib/utils';
 import { getDaysInMonth, getYear, getMonth, format } from 'date-fns';
 
+const EMPLOYEES_STORAGE_KEY = 'chronotrack-employees';
+const ENTRIES_STORAGE_KEY = 'chronotrack-entries';
+
 export default function Home() {
-  const [employees, setEmployees] = useState<string[]>(['Max Mustermann', 'Erika Mustermann']);
+  const [employees, setEmployees] = useState<string[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
   const [allEntries, setAllEntries] = useState<Record<string, Record<string, TimeEntry>>>({});
+  
+  // Load initial data from localStorage
+  useEffect(() => {
+    try {
+      const storedEmployees = localStorage.getItem(EMPLOYEES_STORAGE_KEY);
+      if (storedEmployees) {
+        setEmployees(JSON.parse(storedEmployees));
+      } else {
+        // Default value if nothing is stored
+        setEmployees(['Max Mustermann', 'Erika Mustermann']);
+      }
+
+      const storedEntries = localStorage.getItem(ENTRIES_STORAGE_KEY);
+      if (storedEntries) {
+        setAllEntries(JSON.parse(storedEntries));
+      }
+    } catch (error) {
+      console.error("Failed to load data from localStorage", error);
+      // Fallback to default values
+      setEmployees(['Max Mustermann', 'Erika Mustermann']);
+      setAllEntries({});
+    }
+  }, []);
+
+  // Save employees to localStorage
+  useEffect(() => {
+    try {
+      if(employees.length > 0) {
+        localStorage.setItem(EMPLOYEES_STORAGE_KEY, JSON.stringify(employees));
+      }
+    } catch (error) {
+      console.error("Failed to save employees to localStorage", error);
+    }
+  }, [employees]);
+
+  // Save entries to localStorage
+  useEffect(() => {
+    try {
+      if(Object.keys(allEntries).length > 0) {
+        localStorage.setItem(ENTRIES_STORAGE_KEY, JSON.stringify(allEntries));
+      }
+    } catch (error) {
+      console.error("Failed to save entries to localStorage", error);
+    }
+  }, [allEntries]);
+
 
   const handleSelectEmployee = (employeeName: string) => {
     setSelectedEmployee(employeeName);
@@ -26,15 +75,22 @@ export default function Home() {
   };
 
   const handleDeleteEmployee = (employeeName: string) => {
-    setEmployees(employees.filter(e => e !== employeeName));
+    const updatedEmployees = employees.filter(e => e !== employeeName);
+    setEmployees(updatedEmployees);
+    
     if (selectedEmployee === employeeName) {
       setSelectedEmployee(null);
     }
-    setAllEntries(prev => {
-      const newEntries = {...prev};
-      delete newEntries[employeeName];
-      return newEntries;
-    });
+    
+    const newEntries = {...allEntries};
+    delete newEntries[employeeName];
+    setAllEntries(newEntries);
+
+    // Also update localStorage after deletion
+    if (updatedEmployees.length === 0) {
+      localStorage.removeItem(EMPLOYEES_STORAGE_KEY);
+    }
+    localStorage.setItem(ENTRIES_STORAGE_KEY, JSON.stringify(newEntries));
   }
 
   const handleAddDemoEmployee = () => {
