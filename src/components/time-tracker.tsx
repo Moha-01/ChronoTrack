@@ -161,7 +161,8 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
             </div>
           </div>
 
-          <div className="relative w-full overflow-auto">
+          {/* Desktop Table */}
+          <div className="relative w-full overflow-auto hidden md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -241,6 +242,76 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
               </TableBody>
             </Table>
           </div>
+          
+          {/* Mobile Cards */}
+          <div className="grid grid-cols-1 gap-4 md:hidden">
+            {monthDays.map((day) => {
+              const dayKey = `${format(selectedDate, 'yyyy-MM')}-${day}`;
+              const entry = entries[dayKey];
+              const dayDate = new Date(getYear(selectedDate), getMonth(selectedDate), day);
+              return (
+                <Card key={dayKey} className="w-full">
+                  <CardHeader>
+                    <CardTitle className="text-base flex justify-between items-center">
+                      <span>{format(dayDate, 'EEE, MMM d')}</span>
+                      <span className="text-primary font-semibold text-lg">{formatDuration(entry?.total || 0)}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid gap-4">
+                     <div className="grid w-full items-center gap-1.5">
+                      <Label htmlFor={`project-${dayKey}`}>Object/Project</Label>
+                      <Input
+                        id={`project-${dayKey}`}
+                        value={entry?.project || ''}
+                        onChange={(e) => handleEntryChange(day, 'project', e.target.value)}
+                        placeholder="e.g., Project Phoenix"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor={`begin-${dayKey}`}>Begin</Label>
+                        <Input
+                          id={`begin-${dayKey}`}
+                          type="time"
+                          value={entry?.begin || '00:00'}
+                          onChange={(e) => handleEntryChange(day, 'begin', e.target.value)}
+                        />
+                      </div>
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor={`end-${dayKey}`}>End</Label>
+                        <Input
+                          id={`end-${dayKey}`}
+                          type="time"
+                          value={entry?.end || '00:00'}
+                          onChange={(e) => handleEntryChange(day, 'end', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid w-full items-center gap-1.5">
+                      <Label htmlFor={`pause-${dayKey}`}>Pause (minutes)</Label>
+                      <Input
+                        id={`pause-${dayKey}`}
+                        type="number"
+                        value={entry?.pause || 0}
+                        onChange={(e) => handleEntryChange(day, 'pause', parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+             <Card className="bg-muted/50">
+              <CardHeader className='p-4'>
+                <CardTitle className="text-base flex justify-between items-center">
+                  <span>Total Month Time</span>
+                  <span className="text-primary font-bold text-lg">
+                    {formatDuration(totalMonthDuration)}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+
         </CardContent>
       </Card>
     </>
