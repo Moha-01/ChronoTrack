@@ -19,7 +19,7 @@ export default function PrintableReport({ employee, date, entries, totalDuration
   const entriesByDay = new Map(entries.map(entry => [entry.day, entry]));
 
   return (
-    <div className="bg-white px-4">
+    <div className="bg-white px-8">
       <div className="text-center py-4">
         <h2 className="text-lg font-bold mb-1">Zeitnachweis für {employee}</h2>
         <h3 className="text-base">{monthName}</h3>
