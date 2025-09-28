@@ -22,26 +22,27 @@ import {
 } from '@/components/ui/table';
 import { UserPlus, ChevronRight, Trash2 } from 'lucide-react';
 
-const initialEmployees = ['Max Mustermann', 'Erika Mustermann', 'Peter Jones'];
-
 interface EmployeeDashboardProps {
+  employees: string[];
   onSelectEmployee: (employeeName: string) => void;
+  onAddEmployee: (employeeName: string) => void;
+  onDeleteEmployee: (employeeName: string) => void;
 }
 
-export default function EmployeeDashboard({ onSelectEmployee }: EmployeeDashboardProps) {
-  const [employees, setEmployees] = useState<string[]>(initialEmployees);
+export default function EmployeeDashboard({ 
+  employees, 
+  onSelectEmployee,
+  onAddEmployee,
+  onDeleteEmployee
+}: EmployeeDashboardProps) {
   const [newEmployee, setNewEmployee] = useState('');
 
   const handleAddEmployee = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newEmployee.trim() && !employees.includes(newEmployee.trim())) {
-      setEmployees([...employees, newEmployee.trim()]);
+    if (newEmployee.trim()) {
+      onAddEmployee(newEmployee.trim());
       setNewEmployee('');
     }
-  };
-
-  const handleDeleteEmployee = (employeeToDelete: string) => {
-    setEmployees(employees.filter(employee => employee !== employeeToDelete));
   };
 
   return (
@@ -107,7 +108,7 @@ export default function EmployeeDashboard({ onSelectEmployee }: EmployeeDashboar
                           <Button
                             variant="destructive"
                             size="icon"
-                            onClick={() => handleDeleteEmployee(employee)}
+                            onClick={() => onDeleteEmployee(employee)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

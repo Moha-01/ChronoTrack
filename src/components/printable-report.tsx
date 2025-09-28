@@ -4,7 +4,6 @@ import type { TimeEntry } from '@/lib/types';
 import { formatDuration } from '@/lib/utils';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { getYear, getMonth } from 'date-fns';
 
 interface PrintableReportProps {
   employee: string;
@@ -33,19 +32,16 @@ export default function PrintableReport({ employee, date, entries, totalDuration
         </TableHeader>
         <TableBody>
           {entries.length > 0 ? (
-            entries.map((entry) => {
-              const dayDate = new Date(getYear(date), getMonth(date), entry.day);
-              return (
-                <TableRow key={entry.id}>
-                  <TableCell>{format(dayDate, 'd. MMM yyyy', { locale: de })}</TableCell>
-                  <TableCell>{entry.project}</TableCell>
-                  <TableCell>{entry.begin}</TableCell>
-                  <TableCell>{entry.end}</TableCell>
-                  <TableCell>{entry.pause}</TableCell>
-                  <TableCell className="text-right">{formatDuration(entry.total)}</TableCell>
-                </TableRow>
-              );
-            })
+            entries.map((entry) => (
+              <TableRow key={entry.id}>
+                <TableCell>{format(new Date(getYear(date), getMonth(date), entry.day), 'd. MMM yyyy', { locale: de })}</TableCell>
+                <TableCell>{entry.project}</TableCell>
+                <TableCell>{entry.begin}</TableCell>
+                <TableCell>{entry.end}</TableCell>
+                <TableCell>{entry.pause}</TableCell>
+                <TableCell className="text-right">{formatDuration(entry.total)}</TableCell>
+              </TableRow>
+            ))
           ) : (
             <TableRow>
               <TableCell colSpan={6} className="text-center text-muted-foreground">
