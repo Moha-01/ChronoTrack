@@ -24,7 +24,7 @@ import Link from 'next/link';
 import { UserPlus, ChevronRight, Trash2 } from 'lucide-react';
 import Header from './header';
 
-const initialEmployees = ['John Doe', 'Jane Smith', 'Peter Jones'];
+const initialEmployees = ['Max Mustermann', 'Erika Mustermann', 'Peter Jones'];
 
 export default function EmployeeDashboard() {
   const [employees, setEmployees] = useState<string[]>(initialEmployees);
@@ -51,16 +51,16 @@ export default function EmployeeDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
                 <UserPlus className="h-5 w-5" />
-                Add New Employee
+                Neuen Mitarbeiter hinzufügen
               </CardTitle>
             </CardHeader>
             <form onSubmit={handleAddEmployee}>
               <CardContent>
                 <div className="grid w-full items-center gap-1.5">
-                  <Label htmlFor="employee-name">Employee Name</Label>
+                  <Label htmlFor="employee-name">Mitarbeitername</Label>
                   <Input
                     id="employee-name"
-                    placeholder="e.g., Alice Johnson"
+                    placeholder="z.B. Alice Johnson"
                     value={newEmployee}
                     onChange={(e) => setNewEmployee(e.target.value)}
                   />
@@ -68,7 +68,7 @@ export default function EmployeeDashboard() {
               </CardContent>
               <CardFooter>
                 <Button type="submit" className="w-full">
-                  Add Employee
+                  Mitarbeiter hinzufügen
                 </Button>
               </CardFooter>
             </form>
@@ -77,9 +77,9 @@ export default function EmployeeDashboard() {
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle className="text-xl">Employee List</CardTitle>
+              <CardTitle className="text-xl">Mitarbeiterliste</CardTitle>
               <CardDescription>
-                Select an employee to view their time sheets.
+                Wählen Sie einen Mitarbeiter aus, um dessen Zeitnachweise anzuzeigen.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -87,8 +87,8 @@ export default function EmployeeDashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Employee Name</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Mitarbeitername</TableHead>
+                      <TableHead className="text-right">Aktionen</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -114,7 +114,7 @@ export default function EmployeeDashboard() {
                     {employees.length === 0 && (
                        <TableRow>
                           <TableCell colSpan={2} className="text-center text-muted-foreground">
-                              No employees added yet.
+                              Noch keine Mitarbeiter hinzugefügt.
                           </TableCell>
                       </TableRow>
                     )}

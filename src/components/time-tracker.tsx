@@ -33,6 +33,7 @@ import {
   getYear,
   setYear,
 } from 'date-fns';
+import { de } from 'date-fns/locale';
 
 import type { TimeEntry } from '@/lib/types';
 import { formatDuration, calculateDuration } from '@/lib/utils';
@@ -42,7 +43,7 @@ const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
-  label: format(new Date(0, i), 'MMMM'),
+  label: format(new Date(0, i), 'MMMM', { locale: de }),
 }));
 
 interface TimeTrackerProps {
@@ -110,16 +111,16 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl md:text-2xl">Monthly Time Sheet for {employee}</CardTitle>
+          <CardTitle className="text-xl md:text-2xl">Monatlicher Zeitnachweis für {employee}</CardTitle>
           <CardDescription>
-            Select a month, then log the time for each day.
+            Wählen Sie einen Monat aus und protokollieren Sie die Zeit für jeden Tag.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex gap-4">
               <div className="grid w-full items-center gap-1.5">
-                <Label>Month</Label>
+                <Label>Monat</Label>
                 <Select
                   value={getMonth(selectedDate).toString()}
                   onValueChange={(value) =>
@@ -127,7 +128,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                   }
                 >
                   <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Select Month" />
+                    <SelectValue placeholder="Monat auswählen" />
                   </SelectTrigger>
                   <SelectContent>
                     {months.map((month) => (
@@ -139,7 +140,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                 </Select>
               </div>
               <div className="grid w-full items-center gap-1.5">
-                <Label>Year</Label>
+                <Label>Jahr</Label>
                  <Select
                   value={getYear(selectedDate).toString()}
                   onValueChange={(value) =>
@@ -147,7 +148,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                   }
                 >
                   <SelectTrigger className="w-full sm:w-[120px]">
-                    <SelectValue placeholder="Select Year" />
+                    <SelectValue placeholder="Jahr auswählen" />
                   </SelectTrigger>
                   <SelectContent>
                     {years.map((year) => (
@@ -166,12 +167,12 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[150px] whitespace-nowrap">Day</TableHead>
-                  <TableHead>Object/Project</TableHead>
-                  <TableHead className="w-[100px]">Begin</TableHead>
-                  <TableHead className="w-[100px]">End</TableHead>
+                  <TableHead className="w-[150px] whitespace-nowrap">Tag</TableHead>
+                  <TableHead>Objekt/Projekt</TableHead>
+                  <TableHead className="w-[100px]">Beginn</TableHead>
+                  <TableHead className="w-[100px]">Ende</TableHead>
                   <TableHead className="w-[100px]">Pause (min)</TableHead>
-                  <TableHead className="text-right w-[120px] whitespace-nowrap">Total</TableHead>
+                  <TableHead className="text-right w-[120px] whitespace-nowrap">Gesamt</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -183,7 +184,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                   return (
                     <TableRow key={dayKey}>
                       <TableCell className="font-medium whitespace-nowrap">
-                        {format(dayDate, 'EEE, MMM d')}
+                        {format(dayDate, 'EEE, d. MMM', { locale: de })}
                       </TableCell>
                       <TableCell>
                         <Input
@@ -191,7 +192,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                           onChange={(e) =>
                             handleEntryChange(day, 'project', e.target.value)
                           }
-                          placeholder="e.g., Project Phoenix"
+                          placeholder="z.B. Projekt Phönix"
                           className="min-w-[150px]"
                         />
                       </TableCell>
@@ -233,7 +234,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                 })}
                  <TableRow className="bg-muted/50 hover:bg-muted/50">
                   <TableCell colSpan={5} className="font-bold text-right">
-                    Total Month Time
+                    Gesamtzeit des Monats
                   </TableCell>
                   <TableCell className="text-right font-bold text-lg text-primary whitespace-nowrap">
                     {formatDuration(totalMonthDuration)}
@@ -253,23 +254,23 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                 <Card key={dayKey} className="w-full">
                   <CardHeader>
                     <CardTitle className="text-base flex justify-between items-center">
-                      <span>{format(dayDate, 'EEE, MMM d')}</span>
+                      <span>{format(dayDate, 'EEE, d. MMM', { locale: de })}</span>
                       <span className="text-primary font-semibold text-lg">{formatDuration(entry?.total || 0)}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-4">
                      <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor={`project-${dayKey}`}>Object/Project</Label>
+                      <Label htmlFor={`project-${dayKey}`}>Objekt/Projekt</Label>
                       <Input
                         id={`project-${dayKey}`}
                         value={entry?.project || ''}
                         onChange={(e) => handleEntryChange(day, 'project', e.target.value)}
-                        placeholder="e.g., Project Phoenix"
+                        placeholder="z.B. Projekt Phönix"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid w-full items-center gap-1.5">
-                        <Label htmlFor={`begin-${dayKey}`}>Begin</Label>
+                        <Label htmlFor={`begin-${dayKey}`}>Beginn</Label>
                         <Input
                           id={`begin-${dayKey}`}
                           type="time"
@@ -278,7 +279,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                         />
                       </div>
                       <div className="grid w-full items-center gap-1.5">
-                        <Label htmlFor={`end-${dayKey}`}>End</Label>
+                        <Label htmlFor={`end-${dayKey}`}>Ende</Label>
                         <Input
                           id={`end-${dayKey}`}
                           type="time"
@@ -288,7 +289,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                       </div>
                     </div>
                     <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor={`pause-${dayKey}`}>Pause (minutes)</Label>
+                      <Label htmlFor={`pause-${dayKey}`}>Pause (Minuten)</Label>
                       <Input
                         id={`pause-${dayKey}`}
                         type="number"
@@ -303,7 +304,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
              <Card className="bg-muted/50">
               <CardHeader className='p-4'>
                 <CardTitle className="text-base flex justify-between items-center">
-                  <span>Total Month Time</span>
+                  <span>Gesamtzeit des Monats</span>
                   <span className="text-primary font-bold text-lg">
                     {formatDuration(totalMonthDuration)}
                   </span>
