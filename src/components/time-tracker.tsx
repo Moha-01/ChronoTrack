@@ -50,11 +50,12 @@ const months = Array.from({ length: 12 }, (_, i) => ({
 
 interface TimeTrackerProps {
   employee: string;
+  allEntries: Record<string, Record<string, TimeEntry>>;
+  setAllEntries: React.Dispatch<React.SetStateAction<Record<string, Record<string, TimeEntry>>>>;
 }
 
-export default function TimeTracker({ employee }: TimeTrackerProps) {
+export default function TimeTracker({ employee, allEntries, setAllEntries }: TimeTrackerProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [allEntries, setAllEntries] = useState<Record<string, Record<string, TimeEntry>>>({});
 
   const entries = useMemo(() => {
     const employeeKey = employee || 'default';

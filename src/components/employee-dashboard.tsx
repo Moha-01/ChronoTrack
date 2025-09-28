@@ -20,20 +20,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { UserPlus, ChevronRight, Trash2 } from 'lucide-react';
+import { UserPlus, ChevronRight, Trash2, Rocket } from 'lucide-react';
 
 interface EmployeeDashboardProps {
   employees: string[];
   onSelectEmployee: (employeeName: string) => void;
   onAddEmployee: (employeeName: string) => void;
   onDeleteEmployee: (employeeName: string) => void;
+  onAddDemoEmployee: () => void;
 }
 
 export default function EmployeeDashboard({ 
   employees, 
   onSelectEmployee,
   onAddEmployee,
-  onDeleteEmployee
+  onDeleteEmployee,
+  onAddDemoEmployee,
 }: EmployeeDashboardProps) {
   const [newEmployee, setNewEmployee] = useState('');
 
@@ -48,7 +50,7 @@ export default function EmployeeDashboard({
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 flex flex-col gap-8">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
@@ -74,6 +76,22 @@ export default function EmployeeDashboard({
                 </Button>
               </CardFooter>
             </form>
+          </Card>
+          <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                    <Rocket className="h-5 w-5" />
+                    Schnellstart
+                </CardTitle>
+                <CardDescription>
+                    Erstellen Sie einen Demo-Mitarbeiter mit Beispieldaten für den aktuellen Monat.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button onClick={onAddDemoEmployee} className="w-full">
+                    Demo erstellen
+                </Button>
+            </CardContent>
           </Card>
         </div>
         <div className="md:col-span-2">
