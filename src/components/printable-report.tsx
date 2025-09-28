@@ -31,7 +31,7 @@ export default function PrintableReport({ employee, date, entries, totalDuration
             <TableHead className="p-1 text-[10px]">Objekt/Projekt</TableHead>
             <TableHead className="w-[70px] p-1 text-[10px]">Beginn</TableHead>
             <TableHead className="w-[70px] p-1 text-[10px]">Ende</TableHead>
-            <TableHead className="w-[70px] p-1 text-[10px]">Pause</TableHead>
+            <TableHead className="w-[70px] p-1 text-[10px]">Pause (min)</TableHead>
             <TableHead className="text-right w-[80px] p-1 text-[10px]">Gesamt</TableHead>
           </TableRow>
         </TableHeader>
