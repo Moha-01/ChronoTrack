@@ -45,11 +45,11 @@ export default function EmployeeDashboard() {
   return (
     <>
       <Header />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
         <div className="md:col-span-1">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-xl">
                 <UserPlus className="h-5 w-5" />
                 Add New Employee
               </CardTitle>
@@ -77,48 +77,50 @@ export default function EmployeeDashboard() {
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Employee List</CardTitle>
+              <CardTitle className="text-xl">Employee List</CardTitle>
               <CardDescription>
                 Select an employee to view their time sheets.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employee Name</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {employees.map((employee) => (
-                    <TableRow key={employee}>
-                      <TableCell className="font-medium">{employee}</TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button variant="outline" size="icon" asChild>
-                          <Link href={`/employee/${encodeURIComponent(employee)}`}>
-                            <ChevronRight className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => handleDeleteEmployee(employee)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+              <div className="relative w-full overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Employee Name</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                  {employees.length === 0 && (
-                     <TableRow>
-                        <TableCell colSpan={2} className="text-center text-muted-foreground">
-                            No employees added yet.
+                  </TableHeader>
+                  <TableBody>
+                    {employees.map((employee) => (
+                      <TableRow key={employee}>
+                        <TableCell className="font-medium whitespace-nowrap">{employee}</TableCell>
+                        <TableCell className="text-right space-x-2 whitespace-nowrap">
+                          <Button variant="outline" size="icon" asChild>
+                            <Link href={`/employee/${encodeURIComponent(employee)}`}>
+                              <ChevronRight className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => handleDeleteEmployee(employee)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                      </TableRow>
+                    ))}
+                    {employees.length === 0 && (
+                       <TableRow>
+                          <TableCell colSpan={2} className="text-center text-muted-foreground">
+                              No employees added yet.
+                          </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </div>

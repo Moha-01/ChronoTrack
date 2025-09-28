@@ -110,7 +110,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Monthly Time Sheet for {employee}</CardTitle>
+          <CardTitle className="text-xl md:text-2xl">Monthly Time Sheet for {employee}</CardTitle>
           <CardDescription>
             Select a month, then log the time for each day.
           </CardDescription>
@@ -126,7 +126,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                     setSelectedDate((d) => setMonth(d, parseInt(value)))
                   }
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Select Month" />
                   </SelectTrigger>
                   <SelectContent>
@@ -146,7 +146,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                     setSelectedDate((d) => setYear(d, parseInt(value)))
                   }
                 >
-                  <SelectTrigger className="w-[120px]">
+                  <SelectTrigger className="w-full sm:w-[120px]">
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -165,12 +165,12 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[150px]">Day</TableHead>
+                  <TableHead className="w-[150px] whitespace-nowrap">Day</TableHead>
                   <TableHead>Object/Project</TableHead>
                   <TableHead className="w-[100px]">Begin</TableHead>
                   <TableHead className="w-[100px]">End</TableHead>
                   <TableHead className="w-[100px]">Pause (min)</TableHead>
-                  <TableHead className="text-right w-[120px]">Total</TableHead>
+                  <TableHead className="text-right w-[120px] whitespace-nowrap">Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -181,7 +181,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
 
                   return (
                     <TableRow key={dayKey}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium whitespace-nowrap">
                         {format(dayDate, 'EEE, MMM d')}
                       </TableCell>
                       <TableCell>
@@ -191,6 +191,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                             handleEntryChange(day, 'project', e.target.value)
                           }
                           placeholder="e.g., Project Phoenix"
+                          className="min-w-[150px]"
                         />
                       </TableCell>
                        <TableCell>
@@ -200,6 +201,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                           onChange={(e) =>
                             handleEntryChange(day, 'begin', e.target.value)
                           }
+                          className="min-w-[100px]"
                         />
                       </TableCell>
                       <TableCell>
@@ -209,6 +211,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                           onChange={(e) =>
                             handleEntryChange(day, 'end', e.target.value)
                           }
+                           className="min-w-[100px]"
                         />
                       </TableCell>
                       <TableCell>
@@ -218,9 +221,10 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                           onChange={(e) =>
                             handleEntryChange(day, 'pause', parseInt(e.target.value) || 0)
                           }
+                          className="min-w-[100px]"
                         />
                       </TableCell>
-                      <TableCell className="text-right font-semibold text-primary">
+                      <TableCell className="text-right font-semibold text-primary whitespace-nowrap">
                         {formatDuration(entry?.total || 0)}
                       </TableCell>
                     </TableRow>
@@ -230,7 +234,7 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                   <TableCell colSpan={5} className="font-bold text-right">
                     Total Month Time
                   </TableCell>
-                  <TableCell className="text-right font-bold text-lg text-primary">
+                  <TableCell className="text-right font-bold text-lg text-primary whitespace-nowrap">
                     {formatDuration(totalMonthDuration)}
                   </TableCell>
                 </TableRow>
