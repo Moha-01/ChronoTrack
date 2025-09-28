@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import EmployeeDashboard from '@/components/employee-dashboard';
 import TimeTracker from '@/components/time-tracker';
 import { Button } from '@/components/ui/button';
@@ -141,33 +139,6 @@ export default function Home() {
     setEmployees(prev => [...prev, demoEmployeeName]);
     setSelectedEmployee(demoEmployeeName);
   };
-  
-  const handleGeneratePdf = () => {
-    const reportElement = document.getElementById('printable-report');
-    if (reportElement) {
-      html2canvas(reportElement, {
-        useCORS: true,
-        scale: 2, 
-        logging: true,
-        allowTaint: true,
-      }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, '_blank');
-
-      }).catch(error => {
-        console.error("Error generating PDF:", error);
-      });
-    }
-  };
-
 
   if (selectedEmployee) {
     return (
@@ -184,7 +155,6 @@ export default function Home() {
             employee={selectedEmployee} 
             allEntries={allEntries}
             setAllEntries={setAllEntries}
-            onGeneratePdf={handleGeneratePdf}
           />
         </main>
       </div>

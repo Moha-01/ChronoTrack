@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   Card,
   CardContent,
@@ -52,10 +54,9 @@ interface TimeTrackerProps {
   employee: string;
   allEntries: Record<string, Record<string, TimeEntry>>;
   setAllEntries: React.Dispatch<React.SetStateAction<Record<string, Record<string, TimeEntry>>>>;
-  onGeneratePdf: () => void;
 }
 
-export default function TimeTracker({ employee, allEntries, setAllEntries, onGeneratePdf }: TimeTrackerProps) {
+export default function TimeTracker({ employee, allEntries, setAllEntries }: TimeTrackerProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const entries = useMemo(() => {
@@ -100,6 +101,32 @@ export default function TimeTracker({ employee, allEntries, setAllEntries, onGen
         },
       };
     });
+  };
+
+  const handleGeneratePdf = () => {
+    const reportElement = document.getElementById('printable-report');
+    if (reportElement) {
+      html2canvas(reportElement, {
+        useCORS: true,
+        scale: 2, 
+        logging: true,
+        allowTaint: true,
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+        const pdfBlob = pdf.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        window.open(pdfUrl, '_blank');
+
+      }).catch(error => {
+        console.error("Error generating PDF:", error);
+      });
+    }
   };
 
   const monthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -175,7 +202,7 @@ export default function TimeTracker({ employee, allEntries, setAllEntries, onGen
               </div>
               <div className="grid w-full sm:w-auto items-center gap-1.5">
                   <Label className="hidden sm:block">&nbsp;</Label>
-                  <Button onClick={onGeneratePdf} className="w-full">
+                  <Button onClick={handleGeneratePdf} className="w-full">
                     <Printer className="mr-2 h-4 w-4" />
                     Bericht drucken
                   </Button>
