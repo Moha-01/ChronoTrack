@@ -38,6 +38,8 @@ import { de } from 'date-fns/locale';
 import type { TimeEntry } from '@/lib/types';
 import { formatDuration, calculateDuration } from '@/lib/utils';
 import { Label } from './ui/label';
+import { Printer } from 'lucide-react';
+import PrintableReport from './printable-report';
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
@@ -106,18 +108,24 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
        return acc;
     }, 0);
   }, [entries, selectedDate]);
+  
+  const monthEntries = useMemo(() => {
+    return Object.values(entries).filter(entry => 
+      entry.id.startsWith(format(selectedDate, 'yyyy-MM')) && entry.total > 0
+    );
+  }, [entries, selectedDate]);
 
   return (
     <>
-      <Card>
+      <Card className="print:shadow-none print:border-none">
         <CardHeader>
-          <CardTitle className="text-xl md:text-2xl">Monatlicher Zeitnachweis für {employee}</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl md:text-2xl print:text-2xl print:mb-4">Monatlicher Zeitnachweis für {employee}</CardTitle>
+          <CardDescription className="print:hidden">
             Wählen Sie einen Monat aus und protokollieren Sie die Zeit für jeden Tag.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start print:hidden">
             <div className="flex gap-4">
               <div className="grid w-full items-center gap-1.5">
                 <Label>Monat</Label>
@@ -160,161 +168,178 @@ export default function TimeTracker({ employee }: TimeTrackerProps) {
                 </Select>
               </div>
             </div>
-          </div>
-
-          {/* Desktop Table */}
-          <div className="relative w-full overflow-auto hidden md:block">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[150px] whitespace-nowrap">Tag</TableHead>
-                  <TableHead>Objekt/Projekt</TableHead>
-                  <TableHead className="w-[100px]">Beginn</TableHead>
-                  <TableHead className="w-[100px]">Ende</TableHead>
-                  <TableHead className="w-[100px]">Pause (min)</TableHead>
-                  <TableHead className="text-right w-[120px] whitespace-nowrap">Gesamt</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {monthDays.map((day) => {
-                  const dayKey = `${format(selectedDate, 'yyyy-MM')}-${day}`;
-                  const entry = entries[dayKey];
-                  const dayDate = new Date(getYear(selectedDate), getMonth(selectedDate), day);
-
-                  return (
-                    <TableRow key={dayKey}>
-                      <TableCell className="font-medium whitespace-nowrap">
-                        {format(dayDate, 'EEE, d. MMM', { locale: de })}
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          value={entry?.project || ''}
-                          onChange={(e) =>
-                            handleEntryChange(day, 'project', e.target.value)
-                          }
-                          placeholder="z.B. Projekt Phönix"
-                          className="min-w-[150px]"
-                        />
-                      </TableCell>
-                       <TableCell>
-                        <Input
-                          type="time"
-                          value={entry?.begin || '00:00'}
-                          onChange={(e) =>
-                            handleEntryChange(day, 'begin', e.target.value)
-                          }
-                          className="min-w-[100px]"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="time"
-                          value={entry?.end || '00:00'}
-                          onChange={(e) =>
-                            handleEntryChange(day, 'end', e.target.value)
-                          }
-                           className="min-w-[100px]"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={entry?.pause || 0}
-                          onChange={(e) =>
-                            handleEntryChange(day, 'pause', parseInt(e.target.value) || 0)
-                          }
-                          className="min-w-[100px]"
-                        />
-                      </TableCell>
-                      <TableCell className="text-right font-semibold text-primary whitespace-nowrap">
-                        {formatDuration(entry?.total || 0)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableCell colSpan={5} className="font-bold text-right">
-                    Gesamtzeit des Monats
-                  </TableCell>
-                  <TableCell className="text-right font-bold text-lg text-primary whitespace-nowrap">
-                    {formatDuration(totalMonthDuration)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+             <div className="grid w-full sm:w-auto items-center gap-1.5">
+                <Label className="hidden sm:block">&nbsp;</Label>
+                <Button onClick={() => window.print()} className="w-full">
+                  <Printer className="mr-2 h-4 w-4" />
+                  Bericht drucken
+                </Button>
+            </div>
           </div>
           
-          {/* Mobile Cards */}
-          <div className="grid grid-cols-1 gap-4 md:hidden">
-            {monthDays.map((day) => {
-              const dayKey = `${format(selectedDate, 'yyyy-MM')}-${day}`;
-              const entry = entries[dayKey];
-              const dayDate = new Date(getYear(selectedDate), getMonth(selectedDate), day);
-              return (
-                <Card key={dayKey} className="w-full">
-                  <CardHeader>
-                    <CardTitle className="text-base flex justify-between items-center">
-                      <span>{format(dayDate, 'EEE, d. MMM', { locale: de })}</span>
-                      <span className="text-primary font-semibold text-lg">{formatDuration(entry?.total || 0)}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="grid gap-4">
-                     <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor={`project-${dayKey}`}>Objekt/Projekt</Label>
-                      <Input
-                        id={`project-${dayKey}`}
-                        value={entry?.project || ''}
-                        onChange={(e) => handleEntryChange(day, 'project', e.target.value)}
-                        placeholder="z.B. Projekt Phönix"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid w-full items-center gap-1.5">
-                        <Label htmlFor={`begin-${dayKey}`}>Beginn</Label>
+          <div className="print:hidden">
+            {/* Desktop Table */}
+            <div className="relative w-full overflow-auto hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[150px] whitespace-nowrap">Tag</TableHead>
+                    <TableHead>Objekt/Projekt</TableHead>
+                    <TableHead className="w-[100px]">Beginn</TableHead>
+                    <TableHead className="w-[100px]">Ende</TableHead>
+                    <TableHead className="w-[100px]">Pause (min)</TableHead>
+                    <TableHead className="text-right w-[120px] whitespace-nowrap">Gesamt</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {monthDays.map((day) => {
+                    const dayKey = `${format(selectedDate, 'yyyy-MM')}-${day}`;
+                    const entry = entries[dayKey];
+                    const dayDate = new Date(getYear(selectedDate), getMonth(selectedDate), day);
+
+                    return (
+                      <TableRow key={dayKey}>
+                        <TableCell className="font-medium whitespace-nowrap">
+                          {format(dayDate, 'EEE, d. MMM', { locale: de })}
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={entry?.project || ''}
+                            onChange={(e) =>
+                              handleEntryChange(day, 'project', e.target.value)
+                            }
+                            placeholder="z.B. Projekt Phönix"
+                            className="min-w-[150px]"
+                          />
+                        </TableCell>
+                         <TableCell>
+                          <Input
+                            type="time"
+                            value={entry?.begin || '00:00'}
+                            onChange={(e) =>
+                              handleEntryChange(day, 'begin', e.target.value)
+                            }
+                            className="min-w-[100px]"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="time"
+                            value={entry?.end || '00:00'}
+                            onChange={(e) =>
+                              handleEntryChange(day, 'end', e.target.value)
+                            }
+                             className="min-w-[100px]"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            value={entry?.pause || 0}
+                            onChange={(e) =>
+                              handleEntryChange(day, 'pause', parseInt(e.target.value) || 0)
+                            }
+                            className="min-w-[100px]"
+                          />
+                        </TableCell>
+                        <TableCell className="text-right font-semibold text-primary whitespace-nowrap">
+                          {formatDuration(entry?.total || 0)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                   <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableCell colSpan={5} className="font-bold text-right">
+                      Gesamtzeit des Monats
+                    </TableCell>
+                    <TableCell className="text-right font-bold text-lg text-primary whitespace-nowrap">
+                      {formatDuration(totalMonthDuration)}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+            
+            {/* Mobile Cards */}
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+              {monthDays.map((day) => {
+                const dayKey = `${format(selectedDate, 'yyyy-MM')}-${day}`;
+                const entry = entries[dayKey];
+                const dayDate = new Date(getYear(selectedDate), getMonth(selectedDate), day);
+                return (
+                  <Card key={dayKey} className="w-full">
+                    <CardHeader>
+                      <CardTitle className="text-base flex justify-between items-center">
+                        <span>{format(dayDate, 'EEE, d. MMM', { locale: de })}</span>
+                        <span className="text-primary font-semibold text-lg">{formatDuration(entry?.total || 0)}</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid gap-4">
+                       <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor={`project-${dayKey}`}>Objekt/Projekt</Label>
                         <Input
-                          id={`begin-${dayKey}`}
-                          type="time"
-                          value={entry?.begin || '00:00'}
-                          onChange={(e) => handleEntryChange(day, 'begin', e.target.value)}
+                          id={`project-${dayKey}`}
+                          value={entry?.project || ''}
+                          onChange={(e) => handleEntryChange(day, 'project', e.target.value)}
+                          placeholder="z.B. Projekt Phönix"
                         />
                       </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid w-full items-center gap-1.5">
+                          <Label htmlFor={`begin-${dayKey}`}>Beginn</Label>
+                          <Input
+                            id={`begin-${dayKey}`}
+                            type="time"
+                            value={entry?.begin || '00:00'}
+                            onChange={(e) => handleEntryChange(day, 'begin', e.target.value)}
+                          />
+                        </div>
+                        <div className="grid w-full items-center gap-1.5">
+                          <Label htmlFor={`end-${dayKey}`}>Ende</Label>
+                          <Input
+                            id={`end-${dayKey}`}
+                            type="time"
+                            value={entry?.end || '00:00'}
+                            onChange={(e) => handleEntryChange(day, 'end', e.target.value)}
+                          />
+                        </div>
+                      </div>
                       <div className="grid w-full items-center gap-1.5">
-                        <Label htmlFor={`end-${dayKey}`}>Ende</Label>
+                        <Label htmlFor={`pause-${dayKey}`}>Pause (Minuten)</Label>
                         <Input
-                          id={`end-${dayKey}`}
-                          type="time"
-                          value={entry?.end || '00:00'}
-                          onChange={(e) => handleEntryChange(day, 'end', e.target.value)}
+                          id={`pause-${dayKey}`}
+                          type="number"
+                          value={entry?.pause || 0}
+                          onChange={(e) => handleEntryChange(day, 'pause', parseInt(e.target.value) || 0)}
                         />
                       </div>
-                    </div>
-                    <div className="grid w-full items-center gap-1.5">
-                      <Label htmlFor={`pause-${dayKey}`}>Pause (Minuten)</Label>
-                      <Input
-                        id={`pause-${dayKey}`}
-                        type="number"
-                        value={entry?.pause || 0}
-                        onChange={(e) => handleEntryChange(day, 'pause', parseInt(e.target.value) || 0)}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-             <Card className="bg-muted/50">
-              <CardHeader className='p-4'>
-                <CardTitle className="text-base flex justify-between items-center">
-                  <span>Gesamtzeit des Monats</span>
-                  <span className="text-primary font-bold text-lg">
-                    {formatDuration(totalMonthDuration)}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-            </Card>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+               <Card className="bg-muted/50">
+                <CardHeader className='p-4'>
+                  <CardTitle className="text-base flex justify-between items-center">
+                    <span>Gesamtzeit des Monats</span>
+                    <span className="text-primary font-bold text-lg">
+                      {formatDuration(totalMonthDuration)}
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            </div>
           </div>
 
         </CardContent>
       </Card>
+      <div className="hidden print:block">
+        <PrintableReport 
+            employee={employee}
+            date={selectedDate}
+            entries={monthEntries}
+            totalDuration={totalMonthDuration}
+          />
+      </div>
     </>
   );
 }

@@ -86,3 +86,28 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  body {
+    background: #fff;
+  }
+  .print\:hidden {
+    display: none;
+  }
+  .print\:block {
+    display: block;
+  }
+   .print\:border-none {
+    border: none;
+  }
+  .print\:shadow-none {
+    box-shadow: none;
+  }
+   .print\:text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  .print\:mb-4 {
+    margin-bottom: 1rem;
+  }
+}
