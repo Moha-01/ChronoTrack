@@ -19,18 +19,20 @@ export default function PrintableReport({ employee, date, entries, totalDuration
   const entriesByDay = new Map(entries.map(entry => [entry.day, entry]));
 
   return (
-    <div className="p-4 print:p-0">
-      <h2 className="text-xl font-bold mb-2 print:text-lg">Zeitnachweis für {employee}</h2>
-      <h3 className="text-lg mb-4 print:text-base">{monthName}</h3>
-      <Table className="print:text-xs">
+    <div className="p-4">
+      <div className="text-center mb-4">
+        <h2 className="text-2xl font-bold mb-2">Zeitnachweis für {employee}</h2>
+        <h3 className="text-lg">{monthName}</h3>
+      </div>
+      <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50px] print:p-1">Datum</TableHead>
-            <TableHead className="print:p-1">Objekt/Projekt</TableHead>
-            <TableHead className="w-[70px] print:p-1">Beginn</TableHead>
-            <TableHead className="w-[70px] print:p-1">Ende</TableHead>
-            <TableHead className="w-[80px] print:p-1">Pause (min)</TableHead>
-            <TableHead className="text-right w-[80px] print:p-1">Gesamt</TableHead>
+            <TableHead className="w-[50px] p-1 text-xs">Datum</TableHead>
+            <TableHead className="p-1 text-xs">Objekt/Projekt</TableHead>
+            <TableHead className="w-[70px] p-1 text-xs">Beginn</TableHead>
+            <TableHead className="w-[70px] p-1 text-xs">Ende</TableHead>
+            <TableHead className="w-[80px] p-1 text-xs">Pause (min)</TableHead>
+            <TableHead className="text-right w-[80px] p-1 text-xs">Gesamt</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -39,28 +41,21 @@ export default function PrintableReport({ employee, date, entries, totalDuration
             const dayDate = new Date(getYear(date), getMonth(date), day);
             const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
             return (
-              <TableRow key={day} className={isWeekend ? 'bg-gray-100' : ''}>
-                <TableCell className="print:p-1">{format(dayDate, 'dd.', { locale: de })}</TableCell>
-                <TableCell className="print:p-1">{entry?.project || ''}</TableCell>
-                <TableCell className="print:p-1">{entry?.begin !== '00:00' ? entry?.begin : ''}</TableCell>
-                <TableCell className="print:p-1">{entry?.end !== '00:00' ? entry?.end : ''}</TableCell>
-                <TableCell className="print:p-1">{entry?.pause || ''}</TableCell>
-                <TableCell className="text-right print:p-1">{entry ? formatDuration(entry.total) : ''}</TableCell>
+              <TableRow key={day} className={`${isWeekend ? 'bg-gray-100' : ''} text-xs`}>
+                <TableCell className="p-1">{format(dayDate, 'dd.', { locale: de })}</TableCell>
+                <TableCell className="p-1">{entry?.project || ''}</TableCell>
+                <TableCell className="p-1">{entry?.begin !== '00:00' ? entry?.begin : ''}</TableCell>
+                <TableCell className="p-1">{entry?.end !== '00:00' ? entry?.end : ''}</TableCell>
+                <TableCell className="p-1">{entry?.pause || ''}</TableCell>
+                <TableCell className="text-right p-1">{entry ? formatDuration(entry.total) : ''}</TableCell>
               </TableRow>
             );
           })}
-          {monthDays.length === 0 && (
-             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground print:p-1">
-                Keine Einträge für diesen Monat.
-              </TableCell>
-            </TableRow>
-          )}
         </TableBody>
         <TableFooter>
-          <TableRow>
-            <TableCell colSpan={5} className="text-right font-bold print:p-1">Gesamtzeit des Monats</TableCell>
-            <TableCell className="text-right font-bold print:p-1">{formatDuration(totalDuration)}</TableCell>
+          <TableRow className="text-xs">
+            <TableCell colSpan={5} className="text-right font-bold p-1">Gesamtzeit des Monats</TableCell>
+            <TableCell className="text-right font-bold p-1">{formatDuration(totalDuration)}</TableCell>
           </TableRow>
         </TableFooter>
       </Table>

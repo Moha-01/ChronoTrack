@@ -52,9 +52,10 @@ interface TimeTrackerProps {
   employee: string;
   allEntries: Record<string, Record<string, TimeEntry>>;
   setAllEntries: React.Dispatch<React.SetStateAction<Record<string, Record<string, TimeEntry>>>>;
+  onGeneratePdf: () => void;
 }
 
-export default function TimeTracker({ employee, allEntries, setAllEntries }: TimeTrackerProps) {
+export default function TimeTracker({ employee, allEntries, setAllEntries, onGeneratePdf }: TimeTrackerProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const entries = useMemo(() => {
@@ -174,7 +175,7 @@ export default function TimeTracker({ employee, allEntries, setAllEntries }: Tim
               </div>
               <div className="grid w-full sm:w-auto items-center gap-1.5">
                   <Label className="hidden sm:block">&nbsp;</Label>
-                  <Button onClick={() => window.print()} className="w-full">
+                  <Button onClick={onGeneratePdf} className="w-full">
                     <Printer className="mr-2 h-4 w-4" />
                     Bericht drucken
                   </Button>
@@ -335,7 +336,7 @@ export default function TimeTracker({ employee, allEntries, setAllEntries }: Tim
           </CardContent>
         </Card>
       </div>
-      <div className="hidden print:block">
+      <div id="printable-report" className="hidden print:block">
         <PrintableReport 
             employee={employee}
             date={selectedDate}
