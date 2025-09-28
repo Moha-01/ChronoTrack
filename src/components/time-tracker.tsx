@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
@@ -102,29 +103,46 @@ export default function TimeTracker({ employee, allEntries, setAllEntries }: Tim
       };
     });
   };
-
+  
   const handleGeneratePdf = () => {
-    const reportElement = document.getElementById('printable-report');
-    if (reportElement) {
-      html2canvas(reportElement, {
-        useCORS: true,
-        scale: 2, 
-      }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.width = '210mm'; 
+    document.body.appendChild(tempContainer);
 
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, '_blank');
+    const reportElement = (
+        <PrintableReport
+            employee={employee}
+            date={selectedDate}
+            entries={monthEntries}
+            totalDuration={totalMonthDuration}
+        />
+    );
 
-      }).catch(error => {
-        console.error("Error generating PDF:", error);
-      });
-    }
+    ReactDOM.render(reportElement, tempContainer, () => {
+        html2canvas(tempContainer, {
+            scale: 2,
+            useCORS: true,
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+            const pdfBlob = pdf.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, '_blank');
+
+        }).catch(error => {
+            console.error("Error generating PDF:", error);
+        }).finally(() => {
+            ReactDOM.unmountComponentAtNode(tempContainer);
+            document.body.removeChild(tempContainer);
+        });
+    });
   };
 
   const monthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
