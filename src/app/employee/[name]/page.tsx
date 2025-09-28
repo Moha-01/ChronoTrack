@@ -1,5 +1,3 @@
-'use client';
-
 import Header from '@/components/header';
 import TimeTracker from '@/components/time-tracker';
 import { notFound } from 'next/navigation';
