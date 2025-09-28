@@ -45,16 +45,17 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), 'MMMM'),
 }));
 
-const employees = ['John Doe', 'Jane Smith', 'Peter Jones'];
+interface TimeTrackerProps {
+  employee: string;
+}
 
-export default function TimeTracker() {
-  const [selectedEmployee, setSelectedEmployee] = useState(employees[0]);
+export default function TimeTracker({ employee }: TimeTrackerProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [allEntries, setAllEntries] = useState<Record<string, Record<string, TimeEntry>>>({});
 
   const entries = useMemo(() => {
-    return allEntries[selectedEmployee] || {};
-  }, [allEntries, selectedEmployee]);
+    return allEntries[employee] || {};
+  }, [allEntries, employee]);
 
   const daysInMonth = useMemo(
     () => getDaysInMonth(selectedDate),
@@ -68,7 +69,7 @@ export default function TimeTracker() {
   ) => {
     const dayKey = `${format(selectedDate, 'yyyy-MM')}-${day}`;
     setAllEntries((prev) => {
-      const employeeEntries = prev[selectedEmployee] || {};
+      const employeeEntries = prev[employee] || {};
       const existingEntry = employeeEntries[dayKey] || {
         id: dayKey,
         day,
@@ -86,7 +87,7 @@ export default function TimeTracker() {
 
       return {
         ...prev,
-        [selectedEmployee]: {
+        [employee]: {
           ...employeeEntries,
           [dayKey]: updatedEntry,
         },
@@ -109,33 +110,13 @@ export default function TimeTracker() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Monthly Time Sheet</CardTitle>
+          <CardTitle className="text-2xl">Monthly Time Sheet for {employee}</CardTitle>
           <CardDescription>
-            Select an employee and a month, then log the time for each day.
+            Select a month, then log the time for each day.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="grid w-full sm:max-w-xs items-center gap-1.5">
-              <Label>Employee</Label>
-               <Select
-                  value={selectedEmployee}
-                  onValueChange={(value) =>
-                    setSelectedEmployee(value)
-                  }
-                >
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Select Employee" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employees.map((employee) => (
-                      <SelectItem key={employee} value={employee}>
-                        {employee}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-            </div>
             <div className="flex gap-4">
               <div className="grid w-full items-center gap-1.5">
                 <Label>Month</Label>
