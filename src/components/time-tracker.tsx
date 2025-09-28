@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -17,185 +17,226 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react';
-import { format } from 'date-fns';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  getDaysInMonth,
+  format,
+  setMonth,
+  getMonth,
+  getYear,
+  setYear,
+} from 'date-fns';
 
 import type { TimeEntry } from '@/lib/types';
-import { initialTimeEntries } from '@/lib/data';
-import { TimeEntryDialog } from './time-entry-dialog';
-import { formatDuration } from '@/lib/utils';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { formatDuration, calculateDuration } from '@/lib/utils';
+import { Label } from './ui/label';
+
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
+const months = Array.from({ length: 12 }, (_, i) => ({
+  value: i,
+  label: format(new Date(0, i), 'MMMM'),
+}));
 
 export default function TimeTracker() {
-  const [entries, setEntries] = useState<TimeEntry[]>(initialTimeEntries);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
+  const [employeeName, setEmployeeName] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [entries, setEntries] = useState<Record<string, TimeEntry>>({});
 
-  const handleAddNew = () => {
-    setEditingEntry(null);
-    setIsDialogOpen(true);
+  const daysInMonth = useMemo(
+    () => getDaysInMonth(selectedDate),
+    [selectedDate]
+  );
+
+  const handleEntryChange = (
+    day: number,
+    field: keyof Omit<TimeEntry, 'id' | 'day' | 'total'>,
+    value: string | number
+  ) => {
+    const dayKey = `${format(selectedDate, 'yyyy-MM')}-${day}`;
+    setEntries((prev) => {
+      const existingEntry = prev[dayKey] || {
+        id: dayKey,
+        day,
+        project: '',
+        begin: '00:00',
+        end: '00:00',
+        pause: 0,
+        total: 0,
+      };
+
+      const updatedEntry: TimeEntry = { ...existingEntry, [field]: value };
+      
+      const total = calculateDuration(updatedEntry.begin, updatedEntry.end, updatedEntry.pause);
+      updatedEntry.total = total;
+
+      return {
+        ...prev,
+        [dayKey]: updatedEntry,
+      };
+    });
   };
 
-  const handleEdit = (entry: TimeEntry) => {
-    setEditingEntry(entry);
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = (id: string) => {
-    setEntries((prev) => prev.filter((entry) => entry.id !== id));
-  };
-
-  const handleSave = (data: Omit<TimeEntry, 'id' | 'total'> & { total: number }, id?: string) => {
-    if (id) {
-      // Update existing entry
-      setEntries((prev) =>
-        prev.map((entry) => (entry.id === id ? { ...data, id } : entry))
-      );
-    } else {
-      // Add new entry
-      setEntries((prev) => [{ ...data, id: crypto.randomUUID() }, ...prev]);
-    }
-  };
+  const monthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  
+  const totalMonthDuration = useMemo(() => {
+    return Object.values(entries).reduce((acc, entry) => {
+       if (entry.id.startsWith(format(selectedDate, 'yyyy-MM'))) {
+        return acc + entry.total;
+       }
+       return acc;
+    }, 0);
+  }, [entries, selectedDate]);
 
   return (
     <>
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <CardTitle className="text-2xl">Time Log</CardTitle>
-              <CardDescription>
-                A record of your daily work hours.
-              </CardDescription>
-            </div>
-            <Button onClick={handleAddNew} className="w-full sm:w-auto">
-              <Plus className="mr-2 h-4 w-4" /> Add Time Entry
-            </Button>
-          </div>
+          <CardTitle className="text-2xl">Monthly Time Sheet</CardTitle>
+          <CardDescription>
+            Fill in the employee name, select a month, and log the time for each day.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="grid w-full sm:max-w-xs items-center gap-1.5">
+              <Label htmlFor="employee-name">Employee Name</Label>
+              <Input
+                id="employee-name"
+                value={employeeName}
+                onChange={(e) => setEmployeeName(e.target.value)}
+                placeholder="e.g., John Doe"
+              />
+            </div>
+            <div className="flex gap-4">
+              <div className="grid w-full items-center gap-1.5">
+                <Label>Month</Label>
+                <Select
+                  value={getMonth(selectedDate).toString()}
+                  onValueChange={(value) =>
+                    setSelectedDate((d) => setMonth(d, parseInt(value)))
+                  }
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {months.map((month) => (
+                      <SelectItem key={month.value} value={month.value.toString()}>
+                        {month.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid w-full items-center gap-1.5">
+                <Label>Year</Label>
+                 <Select
+                  value={getYear(selectedDate).toString()}
+                  onValueChange={(value) =>
+                    setSelectedDate((d) => setYear(d, parseInt(value)))
+                  }
+                >
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Select Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
           <div className="relative w-full overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px]">Status</TableHead>
                   <TableHead className="w-[150px]">Day</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead className="text-right">Begin</TableHead>
-                  <TableHead className="text-right">End</TableHead>
-                  <TableHead className="text-right">Pause</TableHead>
+                  <TableHead>Object/Project</TableHead>
+                  <TableHead className="w-[100px]">Begin</TableHead>
+                  <TableHead className="w-[100px]">End</TableHead>
+                  <TableHead className="w-[100px]">Pause (min)</TableHead>
                   <TableHead className="text-right w-[120px]">Total</TableHead>
-                  <TableHead className="w-[50px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {entries.length > 0 ? (
-                  entries.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="border-accent text-accent flex items-center gap-2"
-                        >
-                          <span className="h-2 w-2 rounded-full bg-accent"></span>
-                          Done
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {format(entry.day, 'EEE, MMM d')}
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{entry.project}</div>
-                        <div className="text-sm text-muted-foreground truncate max-w-xs">
-                          {entry.notes}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">{entry.begin}</TableCell>
-                      <TableCell className="text-right">{entry.end}</TableCell>
-                      <TableCell className="text-right">{entry.pause}m</TableCell>
-                      <TableCell className="text-right font-semibold text-primary">
-                        {formatDuration(entry.total)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <AlertDialog>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEdit(entry)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem className="text-red-500 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-900/40">
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                {monthDays.map((day) => {
+                  const dayKey = `${format(selectedDate, 'yyyy-MM')}-${day}`;
+                  const entry = entries[dayKey];
+                  const dayDate = new Date(getYear(selectedDate), getMonth(selectedDate), day);
 
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete this time entry.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(entry.id)}>
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                  return (
+                    <TableRow key={dayKey}>
+                      <TableCell className="font-medium">
+                        {format(dayDate, 'EEE, MMM d')}
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          value={entry?.project || ''}
+                          onChange={(e) =>
+                            handleEntryChange(day, 'project', e.target.value)
+                          }
+                          placeholder="e.g., Project Phoenix"
+                        />
+                      </TableCell>
+                       <TableCell>
+                        <Input
+                          type="time"
+                          value={entry?.begin || '00:00'}
+                          onChange={(e) =>
+                            handleEntryChange(day, 'begin', e.target.value)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="time"
+                          value={entry?.end || '00:00'}
+                          onChange={(e) =>
+                            handleEntryChange(day, 'end', e.target.value)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={entry?.pause || 0}
+                          onChange={(e) =>
+                            handleEntryChange(day, 'pause', parseInt(e.target.value) || 0)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-primary">
+                        {formatDuration(entry?.total || 0)}
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={8}
-                      className="h-24 text-center text-muted-foreground"
-                    >
-                      No time entries found. Add your first one!
-                    </TableCell>
-                  </TableRow>
-                )}
+                  );
+                })}
+                 <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableCell colSpan={5} className="font-bold text-right">
+                    Total Month Time
+                  </TableCell>
+                  <TableCell className="text-right font-bold text-lg text-primary">
+                    {formatDuration(totalMonthDuration)}
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
-
-      <TimeEntryDialog
-        key={editingEntry ? editingEntry.id : 'new'}
-        isOpen={isDialogOpen}
-        setIsOpen={setIsDialogOpen}
-        entry={editingEntry}
-        onSave={handleSave}
-      />
     </>
   );
 }

@@ -1,8 +1,7 @@
 export type TimeEntry = {
   id: string;
-  day: Date;
+  day: number; // Day of the month
   project: string;
-  notes: string;
   begin: string;
   end:string;
   pause: number; // in minutes
