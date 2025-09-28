@@ -20,13 +20,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import Link from 'next/link';
 import { UserPlus, ChevronRight, Trash2 } from 'lucide-react';
-import Header from './header';
 
 const initialEmployees = ['Max Mustermann', 'Erika Mustermann', 'Peter Jones'];
 
-export default function EmployeeDashboard() {
+interface EmployeeDashboardProps {
+  onSelectEmployee: (employeeName: string) => void;
+}
+
+export default function EmployeeDashboard({ onSelectEmployee }: EmployeeDashboardProps) {
   const [employees, setEmployees] = useState<string[]>(initialEmployees);
   const [newEmployee, setNewEmployee] = useState('');
 
@@ -44,7 +46,6 @@ export default function EmployeeDashboard() {
 
   return (
     <>
-      <Header />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
         <div className="md:col-span-1">
           <Card>
@@ -96,10 +97,12 @@ export default function EmployeeDashboard() {
                       <TableRow key={employee}>
                         <TableCell className="font-medium whitespace-nowrap">{employee}</TableCell>
                         <TableCell className="text-right space-x-2 whitespace-nowrap">
-                          <Button variant="outline" size="icon" asChild>
-                            <Link href={`/employee/${encodeURIComponent(employee)}`}>
-                              <ChevronRight className="h-4 w-4" />
-                            </Link>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            onClick={() => onSelectEmployee(employee)}
+                          >
+                            <ChevronRight className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="destructive"
