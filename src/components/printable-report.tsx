@@ -20,7 +20,7 @@ export default function PrintableReport({ employee, date, entries, totalDuration
 
   return (
     <div className="bg-white px-8">
-      <div className="text-center py-4">
+      <div className="text-center py-2">
         <h2 className="text-lg font-bold mb-1">Zeitnachweis für {employee}</h2>
         <h3 className="text-base">{monthName}</h3>
       </div>
@@ -42,20 +42,20 @@ export default function PrintableReport({ employee, date, entries, totalDuration
             const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
             return (
               <TableRow key={day} className={`${isWeekend ? 'bg-gray-100' : ''} text-[10px]`}>
-                <TableCell className="p-1">{format(dayDate, 'dd.MM.', { locale: de })}</TableCell>
-                <TableCell className="p-1">{entry?.project || ''}</TableCell>
-                <TableCell className="p-1">{entry?.begin !== '00:00' ? entry?.begin : ''}</TableCell>
-                <TableCell className="p-1">{entry?.end !== '00:00' ? entry?.end : ''}</TableCell>
-                <TableCell className="p-1">{entry?.pause || ''}</TableCell>
-                <TableCell className="text-right p-1">{entry ? formatDuration(entry.total) : ''}</TableCell>
+                <TableCell className="py-0 px-1">{format(dayDate, 'dd.MM.', { locale: de })}</TableCell>
+                <TableCell className="py-0 px-1">{entry?.project || ''}</TableCell>
+                <TableCell className="py-0 px-1">{entry?.begin !== '00:00' ? entry?.begin : ''}</TableCell>
+                <TableCell className="py-0 px-1">{entry?.end !== '00:00' ? entry?.end : ''}</TableCell>
+                <TableCell className="py-0 px-1">{entry?.pause || ''}</TableCell>
+                <TableCell className="text-right py-0 px-1">{entry ? formatDuration(entry.total) : ''}</TableCell>
               </TableRow>
             );
           })}
         </TableBody>
         <TableFooter>
           <TableRow className="text-xs">
-            <TableCell colSpan={5} className="text-right font-bold p-1">Gesamtzeit des Monats</TableCell>
-            <TableCell className="text-right font-bold p-1">{formatDuration(totalDuration)}</TableCell>
+            <TableCell colSpan={5} className="text-right font-bold py-1 px-1">Gesamtzeit des Monats</TableCell>
+            <TableCell className="text-right font-bold py-1 px-1">{formatDuration(totalDuration)}</TableCell>
           </TableRow>
         </TableFooter>
       </Table>
