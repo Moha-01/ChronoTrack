@@ -27,12 +27,12 @@ export default function PrintableReport({ employee, date, entries, totalDuration
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[80px] p-1 text-[9px]">Datum</TableHead>
-            <TableHead className="p-1 text-[9px]">Objekt/Projekt</TableHead>
-            <TableHead className="w-[70px] p-1 text-[9px]">Beginn</TableHead>
-            <TableHead className="w-[70px] p-1 text-[9px]">Ende</TableHead>
-            <TableHead className="w-[70px] p-1 text-[9px]">Pause</TableHead>
-            <TableHead className="text-right w-[80px] p-1 text-[9px]">Gesamt</TableHead>
+            <TableHead className="w-[80px] p-1 text-[10px]">Datum</TableHead>
+            <TableHead className="p-1 text-[10px]">Objekt/Projekt</TableHead>
+            <TableHead className="w-[70px] p-1 text-[10px]">Beginn</TableHead>
+            <TableHead className="w-[70px] p-1 text-[10px]">Ende</TableHead>
+            <TableHead className="w-[70px] p-1 text-[10px]">Pause</TableHead>
+            <TableHead className="text-right w-[80px] p-1 text-[10px]">Gesamt</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -41,7 +41,7 @@ export default function PrintableReport({ employee, date, entries, totalDuration
             const dayDate = new Date(getYear(date), getMonth(date), day);
             const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
             return (
-              <TableRow key={day} className={`${isWeekend ? 'bg-gray-100' : ''} text-[9px]`}>
+              <TableRow key={day} className={`${isWeekend ? 'bg-gray-100' : ''} text-[10px]`}>
                 <TableCell className="p-1">{format(dayDate, 'dd.MM.', { locale: de })}</TableCell>
                 <TableCell className="p-1">{entry?.project || ''}</TableCell>
                 <TableCell className="p-1">{entry?.begin !== '00:00' ? entry?.begin : ''}</TableCell>
@@ -53,7 +53,7 @@ export default function PrintableReport({ employee, date, entries, totalDuration
           })}
         </TableBody>
         <TableFooter>
-          <TableRow className="text-[10px]">
+          <TableRow className="text-xs">
             <TableCell colSpan={5} className="text-right font-bold p-1">Gesamtzeit des Monats</TableCell>
             <TableCell className="text-right font-bold p-1">{formatDuration(totalDuration)}</TableCell>
           </TableRow>
