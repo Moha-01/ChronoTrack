@@ -19,20 +19,20 @@ export default function PrintableReport({ employee, date, entries, totalDuration
   const entriesByDay = new Map(entries.map(entry => [entry.day, entry]));
 
   return (
-    <div className="p-4 bg-white">
-      <div className="text-center mb-4">
+    <div className="bg-white px-4">
+      <div className="text-center py-4">
         <h2 className="text-lg font-bold mb-1">Zeitnachweis für {employee}</h2>
         <h3 className="text-base">{monthName}</h3>
       </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50px] p-1 text-[9px]">Datum</TableHead>
+            <TableHead className="w-[80px] p-1 text-[9px]">Datum</TableHead>
             <TableHead className="p-1 text-[9px]">Objekt/Projekt</TableHead>
-            <TableHead className="w-[60px] p-1 text-[9px]">Beginn</TableHead>
-            <TableHead className="w-[60px] p-1 text-[9px]">Ende</TableHead>
-            <TableHead className="w-[60px] p-1 text-[9px]">Pause</TableHead>
-            <TableHead className="text-right w-[70px] p-1 text-[9px]">Gesamt</TableHead>
+            <TableHead className="w-[70px] p-1 text-[9px]">Beginn</TableHead>
+            <TableHead className="w-[70px] p-1 text-[9px]">Ende</TableHead>
+            <TableHead className="w-[70px] p-1 text-[9px]">Pause</TableHead>
+            <TableHead className="text-right w-[80px] p-1 text-[9px]">Gesamt</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
