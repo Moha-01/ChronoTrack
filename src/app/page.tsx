@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import EmployeeDashboard from '@/components/employee-dashboard';
 import TimeTracker from '@/components/time-tracker';
 import { Button } from '@/components/ui/button';
@@ -26,7 +28,7 @@ export default function Home() {
         setEmployees(JSON.parse(storedEmployees));
       } else {
         // Default value if nothing is stored
-        setEmployees(['Max Mustermann', 'Erika Mustermann']);
+        setEmployees([]);
       }
 
       const storedEntries = localStorage.getItem(ENTRIES_STORAGE_KEY);
@@ -36,7 +38,7 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to load data from localStorage", error);
       // Fallback to default values
-      setEmployees(['Max Mustermann', 'Erika Mustermann']);
+      setEmployees([]);
       setAllEntries({});
     }
   }, []);
@@ -44,8 +46,13 @@ export default function Home() {
   // Save employees to localStorage
   useEffect(() => {
     try {
+      // Only save if employees array is not empty to avoid overwriting with empty on first load if nothing is there.
+      // A better check might be needed if we want to allow user to delete all employees and persist that.
       if(employees.length > 0) {
         localStorage.setItem(EMPLOYEES_STORAGE_KEY, JSON.stringify(employees));
+      } else {
+        // If all employees are deleted, remove the key from localStorage.
+        localStorage.removeItem(EMPLOYEES_STORAGE_KEY);
       }
     } catch (error) {
       console.error("Failed to save employees to localStorage", error);
@@ -55,9 +62,7 @@ export default function Home() {
   // Save entries to localStorage
   useEffect(() => {
     try {
-      if(Object.keys(allEntries).length > 0) {
         localStorage.setItem(ENTRIES_STORAGE_KEY, JSON.stringify(allEntries));
-      }
     } catch (error) {
       console.error("Failed to save entries to localStorage", error);
     }
@@ -85,12 +90,6 @@ export default function Home() {
     const newEntries = {...allEntries};
     delete newEntries[employeeName];
     setAllEntries(newEntries);
-
-    // Also update localStorage after deletion
-    if (updatedEmployees.length === 0) {
-      localStorage.removeItem(EMPLOYEES_STORAGE_KEY);
-    }
-    localStorage.setItem(ENTRIES_STORAGE_KEY, JSON.stringify(newEntries));
   }
 
   const handleAddDemoEmployee = () => {
@@ -142,6 +141,33 @@ export default function Home() {
     setEmployees(prev => [...prev, demoEmployeeName]);
     setSelectedEmployee(demoEmployeeName);
   };
+  
+  const handleGeneratePdf = () => {
+    const reportElement = document.getElementById('printable-report');
+    if (reportElement) {
+      html2canvas(reportElement, {
+        useCORS: true,
+        scale: 2, 
+        logging: true,
+        allowTaint: true,
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+        const pdfBlob = pdf.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        window.open(pdfUrl, '_blank');
+
+      }).catch(error => {
+        console.error("Error generating PDF:", error);
+      });
+    }
+  };
+
 
   if (selectedEmployee) {
     return (
@@ -160,6 +186,7 @@ export default function Home() {
             employee={selectedEmployee} 
             allEntries={allEntries}
             setAllEntries={setAllEntries}
+            onGeneratePdf={handleGeneratePdf}
           />
         </main>
       </div>
