@@ -7,8 +7,6 @@ import * as z from 'zod';
 import { format } from 'date-fns';
 import {
   Calendar as CalendarIcon,
-  Wand2,
-  Loader2,
   Info,
 } from 'lucide-react';
 
@@ -37,11 +35,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { cn, calculateDuration, formatDuration } from '@/lib/utils';
 import type { TimeEntry } from '@/lib/types';
-import { suggestProjectFromKeywords } from '@/ai/flows/suggest-project-from-keywords';
 
 interface TimeEntryDialogProps {
   isOpen: boolean;
@@ -73,12 +69,9 @@ export function TimeEntryDialog({ isOpen, setIsOpen, entry, onSave }: TimeEntryD
     },
   });
 
-  const { watch, setValue } = form;
-  const [begin, end, pause, notes] = watch(['begin', 'end', 'pause', 'notes']);
+  const { watch } = form;
+  const [begin, end, pause] = watch(['begin', 'end', 'pause']);
   const [calculatedTotal, setCalculatedTotal] = useState(0);
-
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [isSuggesting, setIsSuggesting] = useState(false);
 
   useEffect(() => {
     setCalculatedTotal(calculateDuration(begin, end, pause));
@@ -97,34 +90,6 @@ export function TimeEntryDialog({ isOpen, setIsOpen, entry, onSave }: TimeEntryD
     onSave({ ...values, notes: values.notes || '', total }, entry?.id);
     setIsOpen(false);
   }
-
-  const handleSuggestProject = async () => {
-    if (!notes || notes.trim().length < 3) {
-      toast({
-        variant: 'destructive',
-        title: 'Please enter some notes',
-        description: 'Provide a few keywords in the notes to get suggestions.',
-      });
-      return;
-    }
-    setIsSuggesting(true);
-    setSuggestions([]);
-    try {
-      const result = await suggestProjectFromKeywords({ keywords: notes });
-      setSuggestions(result.suggestedProjects || []);
-      if(result.suggestedProjects.length === 0) {
-        toast({ title: "No suggestions found.", description: "Try using more descriptive keywords."})
-      }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'AI Suggestion Failed',
-        description: 'Could not fetch project suggestions.',
-      });
-    } finally {
-      setIsSuggesting(false);
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -182,40 +147,6 @@ export function TimeEntryDialog({ isOpen, setIsOpen, entry, onSave }: TimeEntryD
 
               <FormField
                 control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes / Keywords</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="e.g., Worked on UI mockups for the new feature" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="space-y-2">
-                <Button type="button" variant="outline" size="sm" onClick={handleSuggestProject} disabled={isSuggesting}>
-                  {isSuggesting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Wand2 className="mr-2 h-4 w-4" />
-                  )}
-                  Suggest Project from Notes
-                </Button>
-                {suggestions.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {suggestions.map((s, i) => (
-                      <Badge key={i} variant="secondary" className="cursor-pointer hover:bg-primary/20" onClick={() => setValue('project', s)}>
-                        {s}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              <FormField
-                control={form.control}
                 name="project"
                 render={({ field }) => (
                   <FormItem>
@@ -228,6 +159,20 @@ export function TimeEntryDialog({ isOpen, setIsOpen, entry, onSave }: TimeEntryD
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes / Keywords</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="e.g., Worked on UI mockups for the new feature" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
