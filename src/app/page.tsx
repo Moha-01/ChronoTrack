@@ -31,7 +31,9 @@ export default function Home() {
   if (selectedEmployee) {
     return (
       <div className="flex flex-col min-h-screen">
-        <Header />
+        <div className="print:hidden">
+          <Header />
+        </div>
         <main className="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
           <div className="mb-4 print:hidden">
             <Button variant="outline" onClick={() => setSelectedEmployee(null)}>
@@ -47,7 +49,9 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <div className="print:hidden">
+        <Header />
+      </div>
       <main className="flex-1 container mx-auto p-4 sm:p-6">
         <EmployeeDashboard 
           employees={employees}

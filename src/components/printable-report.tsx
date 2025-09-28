@@ -57,16 +57,14 @@ export default function PrintableReport({ employee, date, entries, totalDuration
           </TableRow>
         </TableFooter>
       </Table>
-       <div className="mt-12">
-          <div className="flex justify-between">
-              <div className="w-1/2 pr-4">
-                  <div className="border-t pt-2 mt-2 text-center text-sm">Datum / Unterschrift Mitarbeiter</div>
-              </div>
-              <div className="w-1/2 pl-4">
-                  <div className="border-t pt-2 mt-2 text-center text-sm">Datum / Unterschrift Arbeitgeber</div>
-              </div>
-          </div>
-      </div>
     </div>
   );
+}
+
+function getYear(date: Date) {
+  return date.getFullYear();
+}
+
+function getMonth(date: Date) {
+    return date.getMonth();
 }
