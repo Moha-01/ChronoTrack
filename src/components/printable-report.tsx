@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import type { TimeEntry } from '@/lib/types';
 import { formatDuration } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, getDaysInMonth } from 'date-fns';
 import { de } from 'date-fns/locale';
 
 interface PrintableReportProps {
@@ -14,6 +14,9 @@ interface PrintableReportProps {
 
 export default function PrintableReport({ employee, date, entries, totalDuration }: PrintableReportProps) {
   const monthName = format(date, 'MMMM yyyy', { locale: de });
+  const daysInMonth = getDaysInMonth(date);
+  const monthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const entriesByDay = new Map(entries.map(entry => [entry.day, entry]));
 
   return (
     <div className="p-4">
@@ -31,19 +34,22 @@ export default function PrintableReport({ employee, date, entries, totalDuration
           </TableRow>
         </TableHeader>
         <TableBody>
-          {entries.length > 0 ? (
-            entries.map((entry) => (
-              <TableRow key={entry.id}>
-                <TableCell>{format(new Date(getYear(date), getMonth(date), entry.day), 'd. MMM yyyy', { locale: de })}</TableCell>
-                <TableCell>{entry.project}</TableCell>
-                <TableCell>{entry.begin}</TableCell>
-                <TableCell>{entry.end}</TableCell>
-                <TableCell>{entry.pause}</TableCell>
-                <TableCell className="text-right">{formatDuration(entry.total)}</TableCell>
+          {monthDays.map((day) => {
+            const entry = entriesByDay.get(day);
+            const dayDate = new Date(getYear(date), getMonth(date), day);
+            return (
+              <TableRow key={day}>
+                <TableCell>{format(dayDate, 'd. MMM yyyy', { locale: de })}</TableCell>
+                <TableCell>{entry?.project || ''}</TableCell>
+                <TableCell>{entry?.begin !== '00:00' ? entry?.begin : ''}</TableCell>
+                <TableCell>{entry?.end !== '00:00' ? entry?.end : ''}</TableCell>
+                <TableCell>{entry?.pause || ''}</TableCell>
+                <TableCell className="text-right">{entry ? formatDuration(entry.total) : ''}</TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
+            );
+          })}
+          {monthDays.length === 0 && (
+             <TableRow>
               <TableCell colSpan={6} className="text-center text-muted-foreground">
                 Keine Einträge für diesen Monat.
               </TableCell>
