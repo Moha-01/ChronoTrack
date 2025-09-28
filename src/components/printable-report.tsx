@@ -19,20 +19,20 @@ export default function PrintableReport({ employee, date, entries, totalDuration
   const entriesByDay = new Map(entries.map(entry => [entry.day, entry]));
 
   return (
-    <div className="p-4">
+    <div className="p-4 bg-white">
       <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold mb-2">Zeitnachweis für {employee}</h2>
-        <h3 className="text-lg">{monthName}</h3>
+        <h2 className="text-xl font-bold mb-1">Zeitnachweis für {employee}</h2>
+        <h3 className="text-md">{monthName}</h3>
       </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50px] p-1 text-xs">Datum</TableHead>
-            <TableHead className="p-1 text-xs">Objekt/Projekt</TableHead>
-            <TableHead className="w-[70px] p-1 text-xs">Beginn</TableHead>
-            <TableHead className="w-[70px] p-1 text-xs">Ende</TableHead>
-            <TableHead className="w-[80px] p-1 text-xs">Pause (min)</TableHead>
-            <TableHead className="text-right w-[80px] p-1 text-xs">Gesamt</TableHead>
+            <TableHead className="w-[40px] p-1 text-[10px]">Datum</TableHead>
+            <TableHead className="p-1 text-[10px]">Objekt/Projekt</TableHead>
+            <TableHead className="w-[60px] p-1 text-[10px]">Beginn</TableHead>
+            <TableHead className="w-[60px] p-1 text-[10px]">Ende</TableHead>
+            <TableHead className="w-[70px] p-1 text-[10px]">Pause (min)</TableHead>
+            <TableHead className="text-right w-[70px] p-1 text-[10px]">Gesamt</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -41,7 +41,7 @@ export default function PrintableReport({ employee, date, entries, totalDuration
             const dayDate = new Date(getYear(date), getMonth(date), day);
             const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
             return (
-              <TableRow key={day} className={`${isWeekend ? 'bg-gray-100' : ''} text-xs`}>
+              <TableRow key={day} className={`${isWeekend ? 'bg-gray-100' : ''} text-[10px]`}>
                 <TableCell className="p-1">{format(dayDate, 'dd.', { locale: de })}</TableCell>
                 <TableCell className="p-1">{entry?.project || ''}</TableCell>
                 <TableCell className="p-1">{entry?.begin !== '00:00' ? entry?.begin : ''}</TableCell>
@@ -53,7 +53,7 @@ export default function PrintableReport({ employee, date, entries, totalDuration
           })}
         </TableBody>
         <TableFooter>
-          <TableRow className="text-xs">
+          <TableRow className="text-[10px]">
             <TableCell colSpan={5} className="text-right font-bold p-1">Gesamtzeit des Monats</TableCell>
             <TableCell className="text-right font-bold p-1">{formatDuration(totalDuration)}</TableCell>
           </TableRow>
