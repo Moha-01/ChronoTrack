@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import EmployeeDashboard from '@/components/employee-dashboard';
 import TimeTracker from '@/components/time-tracker';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import Header from '@/components/header';
 import type { TimeEntry } from '@/lib/types';
 import { calculateDuration } from '@/lib/utils';
@@ -143,14 +141,11 @@ export default function Home() {
   if (selectedEmployee) {
     return (
       <div className="flex flex-col min-h-screen">
-        <Header />
+        <Header 
+          showBackButton={true} 
+          onBack={() => setSelectedEmployee(null)} 
+        />
         <main className="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
-          <div className="mb-4">
-            <Button variant="outline" onClick={() => setSelectedEmployee(null)}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Zurück zum Dashboard
-            </Button>
-          </div>
           <TimeTracker 
             employee={selectedEmployee} 
             allEntries={allEntries}

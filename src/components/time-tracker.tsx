@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -35,13 +35,14 @@ import {
   getMonth,
   getYear,
   setYear,
+  getDate,
 } from 'date-fns';
 import { de } from 'date-fns/locale';
 
 import type { TimeEntry } from '@/lib/types';
 import { formatDuration, calculateDuration } from '@/lib/utils';
 import { Label } from './ui/label';
-import { Printer } from 'lucide-react';
+import { ArrowUp, Printer } from 'lucide-react';
 import PrintableReport from './printable-report';
 
 const currentYear = new Date().getFullYear();
@@ -59,6 +60,33 @@ interface TimeTrackerProps {
 
 export default function TimeTracker({ employee, allEntries, setAllEntries }: TimeTrackerProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const todayRef = useRef<HTMLDivElement>(null);
+
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Scroll to today's card on mobile, but only if the selected month is the current month
+    const today = new Date();
+    if (getMonth(selectedDate) === getMonth(today) && getYear(selectedDate) === getYear(today)) {
+      setTimeout(() => {
+        todayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [selectedDate, employee]);
+
 
   const entries = useMemo(() => {
     const employeeKey = employee || 'default';
@@ -166,6 +194,10 @@ export default function TimeTracker({ employee, allEntries, setAllEntries }: Tim
       entry.id.startsWith(format(selectedDate, 'yyyy-MM')) && entry.total > 0
     ).sort((a, b) => a.day - b.day);
   }, [entries, selectedDate]);
+  
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <>
@@ -318,8 +350,10 @@ export default function TimeTracker({ employee, allEntries, setAllEntries }: Tim
                   const dayKey = `${format(selectedDate, 'yyyy-MM')}-${day}`;
                   const entry = entries[dayKey];
                   const dayDate = new Date(getYear(selectedDate), getMonth(selectedDate), day);
+                  const isToday = getDate(new Date()) === day && getMonth(new Date()) === getMonth(selectedDate) && getYear(new Date()) === getYear(selectedDate);
+                  
                   return (
-                    <Card key={dayKey} className="w-full">
+                    <Card key={dayKey} className="w-full" ref={isToday ? todayRef : null}>
                       <CardHeader>
                         <CardTitle className="text-base flex justify-between items-center">
                           <span>{format(dayDate, 'EEE, d. MMM', { locale: de })}</span>
@@ -392,6 +426,16 @@ export default function TimeTracker({ employee, allEntries, setAllEntries }: Tim
             totalDuration={totalMonthDuration}
           />
       </div>
+       {showScrollTop && (
+        <Button
+          onClick={scrollToTop}
+          className="fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full shadow-lg"
+          size="icon"
+        >
+          <ArrowUp className="h-6 w-6" />
+          <span className="sr-only">Nach oben scrollen</span>
+        </Button>
+      )}
     </>
   );
 }
