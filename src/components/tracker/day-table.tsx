@@ -18,6 +18,8 @@ interface DayTableProps {
   entries: EmployeeEntries;
   totalMinutes: number;
   suggestionsId?: string;
+  /** Ziel für den Autoscroll zum heutigen Tag. */
+  todayRef?: React.RefObject<HTMLElement | null>;
   onFieldChange(
     dayKey: DayKey,
     field: 'project' | 'begin' | 'end' | 'pause',
@@ -31,6 +33,7 @@ export function DayTable({
   entries,
   totalMinutes,
   suggestionsId,
+  todayRef,
   onFieldChange,
   onClear,
 }: DayTableProps) {
@@ -62,6 +65,7 @@ export function DayTable({
               entry={entries[dayKey]}
               isToday={dayKey === today}
               suggestionsId={suggestionsId}
+              rowRef={dayKey === today ? todayRef : undefined}
               onFieldChange={onFieldChange}
               onClear={onClear}
             />

@@ -21,6 +21,7 @@ import {
 } from '@/hooks/use-chrono-data';
 import { useChronoActions } from '@/components/providers/data-provider';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useScrollToToday } from '@/hooks/use-scroll-to-today';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import {
@@ -56,6 +57,15 @@ export function TrackerView() {
   const employee = useEmployee(employeeId);
   const entries = useEmployeeEntries(employeeId);
   const summary = useMonthSummary(employeeId, monthKey);
+
+  // Beim Öffnen eines Mitarbeiters einmalig zum heutigen Tag springen.
+  // Die Ref lebt hier oben, damit sie den Remount der Kartenliste beim
+  // Monatswechsel überdauert und der Sprung sich nicht wiederholt.
+  const showsToday = monthKey === currentMonthKey();
+  const todayRef = useScrollToToday<HTMLElement>(
+    showsToday && status === 'ready',
+    employeeId
+  );
 
   // Unbekannte oder fehlende ID: zurück zur Liste, statt eine leere Seite zu zeigen.
   React.useEffect(() => {
@@ -156,6 +166,7 @@ export function TrackerView() {
             monthKey={monthKey}
             entries={entries}
             suggestionsId={SUGGESTIONS_ID}
+            todayRef={todayRef}
             onFieldChange={handleFieldChange}
             onClear={handleClear}
           />
@@ -165,6 +176,7 @@ export function TrackerView() {
             entries={entries}
             totalMinutes={summary.totalMinutes}
             suggestionsId={SUGGESTIONS_ID}
+            todayRef={todayRef}
             onFieldChange={handleFieldChange}
             onClear={handleClear}
           />

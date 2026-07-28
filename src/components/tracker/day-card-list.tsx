@@ -12,6 +12,8 @@ interface DayCardListProps {
   monthKey: MonthKey;
   entries: EmployeeEntries;
   suggestionsId?: string;
+  /** Ziel für den Autoscroll zum heutigen Tag. */
+  todayRef?: React.RefObject<HTMLElement | null>;
   onFieldChange(
     dayKey: DayKey,
     field: 'project' | 'begin' | 'end' | 'pause',
@@ -30,6 +32,7 @@ export function DayCardList({
   monthKey,
   entries,
   suggestionsId,
+  todayRef,
   onFieldChange,
   onClear,
 }: DayCardListProps) {
@@ -81,6 +84,7 @@ export function DayCardList({
                 entry={entries[dayKey]}
                 isToday={dayKey === today}
                 suggestionsId={suggestionsId}
+                cardRef={dayKey === today ? todayRef : undefined}
                 onFieldChange={onFieldChange}
                 onClear={onClear}
               />

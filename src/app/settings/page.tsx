@@ -3,6 +3,7 @@ import { AppShell } from '@/components/layout/app-shell';
 import { PageHeader } from '@/components/common/page-header';
 import { ExportCard } from '@/components/data/export-card';
 import { ImportCard } from '@/components/data/import-card';
+import { LegacyBackupCard } from '@/components/data/legacy-backup-card';
 import { DemoDataCard } from '@/components/data/demo-data-card';
 import { DangerZone } from '@/components/data/danger-zone';
 
@@ -33,6 +34,7 @@ export default function SettingsPage() {
           </p>
           <ExportCard />
           <ImportCard />
+          <LegacyBackupCard />
         </section>
 
         <section aria-labelledby="misc-heading" className="space-y-4">

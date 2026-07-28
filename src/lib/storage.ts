@@ -79,23 +79,46 @@ export function loadData(): LoadResult {
 
   const { data, report } = migrateV0toV1(rawEmployees, rawEntries);
 
+  // Die Reihenfolge ist bewusst so gewählt, dass an keiner Stelle Daten
+  // verloren gehen können — auch nicht, wenn der Speicher voll ist (die
+  // Sicherung verdoppelt den Bedarf kurzzeitig):
+  //
+  //   1. neuen Stand schreiben. Scheitert das, bleibt alles Alte unberührt.
+  //   2. Rohdaten sichern.
+  //   3. Alte Schlüssel NUR entfernen, wenn Schritt 2 geklappt hat — sonst
+  //      sind sie selbst noch die einzige Sicherung und bleiben liegen.
+  let v1Written = false;
   try {
-    // Zuerst die Rohdaten sichern — erst danach darf irgendetwas gelöscht werden.
-    window.localStorage.setItem(
-      V0_BACKUP_KEY,
-      JSON.stringify({
-        employees: rawEmployees,
-        entries: rawEntries,
-        migratedAt: new Date().toISOString(),
-      })
-    );
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    window.localStorage.removeItem(LEGACY_EMPLOYEES_KEY);
-    window.localStorage.removeItem(LEGACY_ENTRIES_KEY);
+    v1Written = true;
   } catch (error) {
-    // Migration im Speicher gelungen, Persistieren nicht. Daten trotzdem
-    // anzeigen; der nächste Save versucht es erneut.
-    console.error('Migration konnte nicht gespeichert werden', error);
+    console.error('Migrierter Stand konnte nicht gespeichert werden', error);
+  }
+
+  if (v1Written) {
+    let backupWritten = false;
+    try {
+      window.localStorage.setItem(
+        V0_BACKUP_KEY,
+        JSON.stringify({
+          employees: rawEmployees,
+          entries: rawEntries,
+          migratedAt: new Date().toISOString(),
+        })
+      );
+      backupWritten = true;
+    } catch (error) {
+      console.error('Sicherung der alten Daten fehlgeschlagen', error);
+    }
+
+    if (backupWritten) {
+      try {
+        window.localStorage.removeItem(LEGACY_EMPLOYEES_KEY);
+        window.localStorage.removeItem(LEGACY_ENTRIES_KEY);
+      } catch (error) {
+        console.error('Alte Schlüssel konnten nicht entfernt werden', error);
+      }
+    }
   }
 
   return {
@@ -262,8 +285,47 @@ export function clearAllData(): void {
   }
 }
 
+export interface V0Backup {
+  /** die unveränderten Rohstrings aus der alten Version */
+  employees: string | null;
+  entries: string | null;
+  migratedAt: string;
+}
+
+/**
+ * Die beim Umstieg gesicherten Rohdaten der alten Version.
+ *
+ * Sie werden bewusst nie automatisch gelöscht — auch nicht von
+ * `clearAllData()` — damit der ursprüngliche Stand jederzeit wieder
+ * eingelesen werden kann.
+ */
+export function readV0Backup(): V0Backup | null {
+  if (!hasWindow()) return null;
+
+  const raw = readKey(V0_BACKUP_KEY);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as V0Backup;
+      return {
+        employees: typeof parsed.employees === 'string' ? parsed.employees : null,
+        entries: typeof parsed.entries === 'string' ? parsed.entries : null,
+        migratedAt: typeof parsed.migratedAt === 'string' ? parsed.migratedAt : '',
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // Sonderfall: die Migration lief noch nicht oder konnte die Sicherung nicht
+  // schreiben — dann liegen die Originalschlüssel noch da.
+  const employees = readKey(LEGACY_EMPLOYEES_KEY);
+  const entries = readKey(LEGACY_ENTRIES_KEY);
+  if (employees === null && entries === null) return null;
+  return { employees, entries, migratedAt: '' };
+}
+
 export function hasV0Backup(): boolean {
-  return hasWindow() && readKey(V0_BACKUP_KEY) !== null;
+  return readV0Backup() !== null;
 }
 
 export function isQuotaError(error: unknown): boolean {

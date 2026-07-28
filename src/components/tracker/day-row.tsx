@@ -19,6 +19,8 @@ export interface DayRowProps {
   entry: TimeEntry | undefined;
   isToday: boolean;
   suggestionsId?: string;
+  /** Wird nur an der Zeile des heutigen Tages gesetzt (Autoscroll). */
+  rowRef?: React.RefObject<HTMLElement | null>;
   onFieldChange(
     dayKey: DayKey,
     field: 'project' | 'begin' | 'end' | 'pause',
@@ -32,6 +34,7 @@ function DayRowImpl({
   entry,
   isToday,
   suggestionsId,
+  rowRef,
   onFieldChange,
   onClear,
 }: DayRowProps) {
@@ -40,7 +43,10 @@ function DayRowImpl({
   const filled = hasContent(entry);
 
   return (
-    <TableRow className={cn(weekend && 'bg-weekend', isToday && 'bg-primary/5')}>
+    <TableRow
+      ref={rowRef as React.Ref<HTMLTableRowElement>}
+      className={cn(weekend && 'bg-weekend', isToday && 'bg-primary/5')}
+    >
       <TableCell className="whitespace-nowrap font-medium">
         <span className="flex items-center gap-2">
           {isToday ? (

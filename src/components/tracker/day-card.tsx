@@ -23,6 +23,8 @@ export interface DayCardProps {
   entry: TimeEntry | undefined;
   isToday: boolean;
   suggestionsId?: string;
+  /** Wird nur an der Karte des heutigen Tages gesetzt (Autoscroll). */
+  cardRef?: React.RefObject<HTMLElement | null>;
   onFieldChange(
     dayKey: DayKey,
     field: 'project' | 'begin' | 'end' | 'pause',
@@ -36,6 +38,7 @@ function DayCardImpl({
   entry,
   isToday,
   suggestionsId,
+  cardRef,
   onFieldChange,
   onClear,
 }: DayCardProps) {
@@ -50,6 +53,7 @@ function DayCardImpl({
 
   return (
     <Collapsible
+      ref={cardRef as React.Ref<HTMLDivElement>}
       open={open}
       onOpenChange={setOpen}
       className={cn(
