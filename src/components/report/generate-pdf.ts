@@ -55,21 +55,26 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<Bl
       backgroundColor: '#ffffff',
     });
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imageData = canvas.toDataURL('image/png');
+    // compress: sonst landet das Bild praktisch unkomprimiert im PDF und ein
+    // einzelner Monatsbericht wiegt zweistellige Megabyte -- unbrauchbar zum
+    // Verschicken. JPEG statt PNG, weil die Vorlage eine gerasterte Tabelle
+    // ohne Transparenz ist.
+    const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
+    const imageData = canvas.toDataURL('image/jpeg', 0.92);
 
     const renderedHeightMm = (canvas.height * A4_WIDTH_MM) / canvas.width;
 
     if (renderedHeightMm <= A4_HEIGHT_MM) {
-      pdf.addImage(imageData, 'PNG', 0, 0, A4_WIDTH_MM, renderedHeightMm);
+      pdf.addImage(imageData, 'JPEG', 0, 0, A4_WIDTH_MM, renderedHeightMm, 'report', 'FAST');
     } else {
       // Sicherheitsnetz: passt der Monat nicht auf eine Seite, wird das Bild
       // seitenweise verschoben statt unten stillschweigend abgeschnitten.
+      // Der gleiche `alias` sorgt dafür, dass es nur EINMAL eingebettet wird.
       let offsetMm = 0;
       let page = 0;
       while (offsetMm < renderedHeightMm) {
         if (page > 0) pdf.addPage();
-        pdf.addImage(imageData, 'PNG', 0, -offsetMm, A4_WIDTH_MM, renderedHeightMm);
+        pdf.addImage(imageData, 'JPEG', 0, -offsetMm, A4_WIDTH_MM, renderedHeightMm, 'report', 'FAST');
         offsetMm += A4_HEIGHT_MM;
         page += 1;
       }
