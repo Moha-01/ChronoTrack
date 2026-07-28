@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/toaster';
+import { DataProvider } from '@/components/providers/data-provider';
 import { THEME_KEY } from '@/lib/storage';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -13,8 +14,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
       storageKey={THEME_KEY}
       disableTransitionOnChange
     >
-      {children}
-      <Toaster />
+      {/* Liegt über der Route-Grenze, damit / und /tracker denselben Bestand
+          teilen und ein Seitenwechsel nichts neu lädt. */}
+      <DataProvider>
+        {children}
+        <Toaster />
+      </DataProvider>
     </ThemeProvider>
   );
 }
