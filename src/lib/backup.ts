@@ -11,6 +11,7 @@ import { backupSchema } from '@/lib/backup-schema';
 import { isDayKey, makeDayKey, parseDayKey } from '@/lib/date-keys';
 import { createId } from '@/lib/id';
 import { calculateDuration } from '@/lib/utils';
+import { migrateV0toV1 } from '@/lib/migrate';
 
 export const APP_VERSION = '1.0.0';
 export const ORPHAN_EMPLOYEE_NAME = 'Unbekannt (importiert)';
@@ -88,6 +89,12 @@ export function parseBackup(text: string): ParseBackupResult {
 
   const parsed = backupSchema.safeParse(raw);
   if (!parsed.success) {
+    // Prüfe, ob es sich um eine Sicherung im Altformat (v0 / Stand aus main) handelt
+    const legacyParsed = tryParseLegacyBackup(raw);
+    if (legacyParsed) {
+      return legacyParsed;
+    }
+
     return {
       ok: false,
       error: 'Diese Datei ist keine ChronoTrack-Sicherung.',
@@ -111,6 +118,61 @@ export function parseBackup(text: string): ParseBackupResult {
   }
 
   return { ok: true, payload, exportedAt: parsed.data.exportedAt, repairs };
+}
+
+/**
+ * Erkennt und migriert Sicherungen aus der früheren Version der App (main).
+ * Unterstützt:
+ *  - chronotrack.legacy-raw
+ *  - JSON-Exporte mit 'chronotrack-employees' / 'chronotrack-entries'
+ *  - Altes Format { employees: ["Name", ...], entries: { "Name": { ... } } }
+ */
+function tryParseLegacyBackup(raw: unknown): ParseBackupResult | null {
+  if (!raw || typeof raw !== 'object') return null;
+
+  const obj = raw as Record<string, unknown>;
+
+  let employeesStr: string | null = null;
+  let entriesStr: string | null = null;
+
+  if ('chronotrack-employees' in obj || 'chronotrack-entries' in obj) {
+    const rawEmp = obj['chronotrack-employees'];
+    const rawEnt = obj['chronotrack-entries'];
+    employeesStr = typeof rawEmp === 'string' ? rawEmp : JSON.stringify(rawEmp ?? []);
+    entriesStr = typeof rawEnt === 'string' ? rawEnt : JSON.stringify(rawEnt ?? {});
+  } else if (Array.isArray(obj.employees) && obj.employees.every((e) => typeof e === 'string')) {
+    employeesStr = JSON.stringify(obj.employees);
+    entriesStr = typeof obj.entries === 'string' ? obj.entries : JSON.stringify(obj.entries ?? {});
+  }
+
+  if (!employeesStr && !entriesStr) return null;
+
+  const { data, report } = migrateV0toV1(employeesStr, entriesStr);
+  if (data.employees.length === 0 && countEntries(data.entries) === 0) {
+    return null;
+  }
+
+  const repairs: RepairReport = {
+    idsFixed: 0,
+    daysFixed: 0,
+    totalsRecomputed: 0,
+    keysNormalized: report.keyCollisions,
+    orphanEmployeesCreated: report.recoveredOrphans,
+    entriesDropped: report.unrecoverableEntries,
+  };
+
+  return {
+    ok: true,
+    payload: {
+      employees: data.employees,
+      entries: data.entries,
+    },
+    exportedAt:
+      (typeof obj.migratedAt === 'string' && obj.migratedAt) ||
+      (typeof obj.exportedAt === 'string' && obj.exportedAt) ||
+      new Date().toISOString(),
+    repairs,
+  };
 }
 
 /**

@@ -6,6 +6,7 @@ import { ImportCard } from '@/components/data/import-card';
 import { LegacyBackupCard } from '@/components/data/legacy-backup-card';
 import { DemoDataCard } from '@/components/data/demo-data-card';
 import { DangerZone } from '@/components/data/danger-zone';
+import { SecurityCard } from '@/components/auth/security-card';
 
 export const metadata: Metadata = {
   title: 'Daten & Einstellungen',
@@ -20,6 +21,13 @@ export default function SettingsPage() {
       />
 
       <div className="space-y-6">
+        <section aria-labelledby="security-heading" className="space-y-4">
+          <h2 id="security-heading" className="text-sm font-medium text-muted-foreground">
+            Sicherheit
+          </h2>
+          <SecurityCard />
+        </section>
+
         <section aria-labelledby="data-heading" className="space-y-4">
           <h2 id="data-heading" className="text-sm font-medium text-muted-foreground">
             Sicherung

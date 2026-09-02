@@ -60,7 +60,33 @@ export function loadData(): LoadResult {
   if (rawV1) {
     try {
       const parsed = JSON.parse(rawV1) as ChronoTrackData;
-      return { status: 'ok', data: normalize(parsed), migration: null };
+      const normalized = normalize(parsed);
+
+      // Falls der v1-Stand komplett leer ist, prüfen wir, ob noch Altdaten
+      // aus der früheren Version (main) vorliegen, und migrieren diese automatisch.
+      if (normalized.employees.length === 0 && Object.keys(normalized.entries).length === 0) {
+        const rawEmployees = readKey(LEGACY_EMPLOYEES_KEY);
+        const rawEntries = readKey(LEGACY_ENTRIES_KEY);
+        if (rawEmployees !== null || rawEntries !== null) {
+          return applyAndSaveMigration(rawEmployees, rawEntries);
+        }
+        const rawV0Backup = readKey(V0_BACKUP_KEY);
+        if (rawV0Backup) {
+          try {
+            const b = JSON.parse(rawV0Backup);
+            if (b.employees || b.entries) {
+              const preview = migrateV0toV1(b.employees, b.entries);
+              if (preview.data.employees.length > 0) {
+                return applyAndSaveMigration(b.employees, b.entries);
+              }
+            }
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+
+      return { status: 'ok', data: normalized, migration: null };
     } catch (error) {
       return {
         status: 'recovered',
@@ -77,6 +103,13 @@ export function loadData(): LoadResult {
     return { status: 'ok', data: emptyData(), migration: null };
   }
 
+  return applyAndSaveMigration(rawEmployees, rawEntries);
+}
+
+function applyAndSaveMigration(
+  rawEmployees: string | null,
+  rawEntries: string | null
+): LoadResult {
   const { data, report } = migrateV0toV1(rawEmployees, rawEntries);
 
   // Die Reihenfolge ist bewusst so gewählt, dass an keiner Stelle Daten

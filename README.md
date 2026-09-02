@@ -27,10 +27,11 @@ Gerät wechselt. Safari räumt den Speicher zudem nach längerer Inaktivität au
 
 ```bash
 npm install
-npm run dev        # http://localhost:9002
+npm run dev        # http://localhost:9002 (oder npm start)
 npm run typecheck
 npm run test
 npm run build      # statischer Export nach out/
+npm run preview    # Vorschau des statischen Exports (npx serve out)
 ```
 
 ### Produktionsstand lokal nachstellen

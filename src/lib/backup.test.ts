@@ -94,6 +94,40 @@ describe('Import-Validierung', () => {
     expect(result.issues?.length).toBeGreaterThan(0);
   });
 
+  it('erkennt und importiert Rohdaten-Backups aus der früheren Version (main)', () => {
+    const legacyJson = JSON.stringify({
+      format: 'chronotrack.legacy-raw',
+      migratedAt: '2026-08-01T10:00:00.000Z',
+      'chronotrack-employees': JSON.stringify(['Max Mustermann', 'Erika Musterfrau']),
+      'chronotrack-entries': JSON.stringify({
+        'Max Mustermann': {
+          '2026-08-1': {
+            id: '2026-08-1',
+            day: 1,
+            project: 'Projekt Alt',
+            begin: '08:00',
+            end: '16:30',
+            pause: 30,
+            total: 480,
+          },
+        },
+      }),
+    });
+
+    const result = parseBackup(legacyJson);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.payload.employees.length).toBe(2);
+    expect(result.payload.employees[0].name).toBe('Max Mustermann');
+    expect(result.payload.employees[1].name).toBe('Erika Musterfrau');
+
+    // Prüfe, ob Datumsschlüssel gepolstert wurde
+    const maxId = result.payload.employees[0].id;
+    expect(result.payload.entries[maxId]?.['2026-08-01']).toBeDefined();
+    expect(result.payload.entries[maxId]?.['2026-08-01'].project).toBe('Projekt Alt');
+  });
+
   it('lehnt eine Sicherung aus einer neueren Version ab', () => {
     const backup = createBackup(data());
     const result = parseBackup(JSON.stringify({ ...backup, schemaVersion: 99 }));

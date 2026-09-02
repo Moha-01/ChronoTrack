@@ -35,29 +35,52 @@ export function PrintableReport({
   return (
     <div className="prn">
       <style>{`
-        .prn { display: block; width: 190mm; margin: 0 auto; background: #fff; color: #000;
-               font-family: Arial, Helvetica, sans-serif; }
+        .prn {
+          display: block;
+          width: 190mm;
+          margin: 0 auto;
+          background: #ffffff;
+          color: #000000;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          text-rendering: geometricPrecision;
+        }
         .prn * { color: #000; box-sizing: border-box; }
-        .prn .hdr { text-align: center; padding: 6mm 0 4mm; }
-        .prn .hdr h2 { margin: 0 0 2mm 0; font-weight: 700; font-size: 12pt; }
-        .prn .hdr h3 { margin: 0; font-size: 10pt; font-weight: 600; }
-        .prn table { width: 100%; border-collapse: collapse; table-layout: fixed;
-                     font-size: 9pt; line-height: 1.2; border: 0.4mm solid #000; }
-        .prn th, .prn td { border: 0.4mm solid #000; padding: 1mm 2mm; overflow: hidden;
-                           white-space: nowrap; text-overflow: ellipsis; height: 7mm;
-                           vertical-align: middle; }
-        .prn thead th, .prn tfoot td { font-weight: 700; background: #f2f2f2;
-                                       -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .prn .c-date  { width: 20mm; }
-        .prn .c-proj  { width: 70mm; }
+        .prn .hdr { text-align: center; padding: 4mm 0 4mm; }
+        .prn .hdr h2 { margin: 0 0 1.5mm 0; font-weight: 700; font-size: 13pt; letter-spacing: -0.01em; }
+        .prn .hdr h3 { margin: 0; font-size: 10.5pt; font-weight: 600; color: #222; }
+        .prn table {
+          width: 100%;
+          border-collapse: collapse;
+          table-layout: fixed;
+          font-size: 8.5pt;
+          line-height: 1.2;
+          border: 0.35mm solid #111;
+        }
+        .prn th, .prn td {
+          border: 0.3mm solid #333;
+          padding: 1mm 2mm;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          height: 6.8mm;
+          vertical-align: middle;
+        }
+        .prn thead th, .prn tfoot td {
+          font-weight: 700;
+          background: #f0f0f0;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        .prn .c-date  { width: 22mm; }
+        .prn .c-proj  { width: 68mm; }
         .prn .c-beg   { width: 20mm; text-align: center; }
         .prn .c-end   { width: 20mm; text-align: center; }
         .prn .c-break { width: 22mm; text-align: center; }
         .prn .c-total { width: 22mm; text-align: right; }
-        .prn .wknd td { background: #ebebeb; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .prn .wknd td { background: #f5f5f5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .prn tr, .prn th, .prn td { page-break-inside: avoid; }
-        .prn .sign { margin-top: 8mm; display: flex; justify-content: space-between; font-size: 9pt; }
-        .prn .sign div { width: 70mm; border-top: 0.3mm solid #000; padding-top: 1.5mm; text-align: center; }
       `}</style>
 
       <div className="hdr">
@@ -104,11 +127,6 @@ export function PrintableReport({
           </tr>
         </tfoot>
       </table>
-
-      <div className="sign">
-        <div>Datum, Unterschrift Mitarbeiter</div>
-        <div>Datum, Unterschrift Vorgesetzter</div>
-      </div>
     </div>
   );
 }

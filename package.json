@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "node scripts/dev.mjs dev --turbopack -p 9002",
     "build": "next build",
-    "start": "next start",
+    "start": "npm run dev",
+    "preview": "npx serve out",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
