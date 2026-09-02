@@ -24,6 +24,11 @@ const buttonVariants = cva(
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        // 44px -- das Mindestmaß für Touch-Ziele. `icon` ist mit 40px zu klein
+        // und wird von Lighthouse als "Tap target too small" beanstandet.
+        touch: "h-touch w-touch",
+        // Volle Breite, große Trefferfläche: für die Hauptaktion auf Mobilgeräten.
+        touchWide: "h-touch px-4 py-2",
       },
     },
     defaultVariants: {

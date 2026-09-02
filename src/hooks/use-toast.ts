@@ -8,8 +8,13 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+// Mehrere Meldungen gleichzeitig: Speichern, Undo und Migrationshinweis
+// koennen zusammenfallen.
+const TOAST_LIMIT = 3
+// Wie lange ein geschlossener Toast noch im Speicher gehalten wird, damit die
+// Ausblend-Animation laufen kann. Der shadcn-Standardwert von 1_000_000 ms
+// (gut 16 Minuten) haelt jeden je gezeigten Toast im State fest.
+const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = ToastProps & {
   id: string
